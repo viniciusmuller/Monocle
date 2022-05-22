@@ -8,12 +8,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Monocle.Api
 {
     abstract class Event { }
 
-    class BaseEvent {
+    class BaseEvent
+    {
         [JsonConverter(typeof(StringEnumConverter))]
         public EventType Type;
 
@@ -44,15 +46,29 @@ namespace Monocle.Api
     {
         public PlayerModel Player;
         public string Message;
+        public string ColorHex;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public ChatMode ChatMode;
 
-        public PlayerMessageEvent(PlayerModel player, EChatMode chatMode, string message)
+        public PlayerMessageEvent(PlayerModel player, Color color, EChatMode chatMode, string message)
         {
             Player = player;
             Message = message;
             ChatMode = chatMode.ToMonocleChatMode();
+            ColorHex = ColorUtility.ToHtmlStringRGB(color);
+        }
+    }
+
+    class PlayerJoinOrLeaveEvent : Event
+    {
+        public PlayerModel Player;
+        public DateTimeOffset Time;
+
+        public PlayerJoinOrLeaveEvent(PlayerModel player)
+        {
+            Player = player;
+            Time = DateTimeOffset.UtcNow; // TODO: Fix timezone
         }
     }
 

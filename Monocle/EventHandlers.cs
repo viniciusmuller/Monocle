@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Monocle
 {
@@ -21,10 +22,16 @@ namespace Monocle
             return new PlayerDeathEvent(dead, killerModel, cause.ToString());
         }
 
-        public static PlayerMessageEvent PlayerMessage(UnturnedPlayer player, EChatMode chatMode, string message)
+        public static PlayerMessageEvent PlayerMessage(UnturnedPlayer player, Color color, EChatMode chatMode, string message)
         {
             var playerModel = new PlayerModel(player);
-            return new PlayerMessageEvent(playerModel, chatMode, message);
+            return new PlayerMessageEvent(playerModel, color, chatMode, message);
+        }
+
+        internal static PlayerJoinOrLeaveEvent PlayerJoinedOrLeft(UnturnedPlayer player)
+        {
+            var playerModel = new PlayerModel(player);
+            return new PlayerJoinOrLeaveEvent(playerModel);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Monocle.Models
         public int Ping { get; set; }
         public Position Position { get; set; }
         public byte Health { get; set; }
+        public float Rotation { get; set; }
 
         public PlayerModel(SteamPlayer player)
         {
@@ -25,6 +26,7 @@ namespace Monocle.Models
             Ping = (int)Math.Ceiling(player.ping);
             Position = player.player.transform.position.ToPosition();
             Health = player.player.life.health;
+            Rotation = player.player.transform.rotation.eulerAngles.y;
         }
 
         public PlayerModel(UnturnedPlayer player)
@@ -35,6 +37,7 @@ namespace Monocle.Models
             Ping = (int)Math.Ceiling(player.Ping);
             Position = player.Position.ToPosition();
             Health = player.Health;
+            Rotation = player.Rotation;
         }
     }
 

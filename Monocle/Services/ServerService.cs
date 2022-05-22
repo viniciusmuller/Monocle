@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Rocket.Core.Logging;
+using Rocket.Unturned;
 using Rocket.Unturned.Events;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
@@ -60,10 +61,22 @@ namespace Monocle.Services
                 BroadcastEvent(EventType.PlayerDeath, @event);
             };
 
-            UnturnedPlayerEvents.OnPlayerChatted += (UnturnedPlayer player, ref UnityEngine.Color _color, string message, EChatMode chatMode, ref bool _cancel) =>
+            UnturnedPlayerEvents.OnPlayerChatted += (UnturnedPlayer player, ref UnityEngine.Color color, string message, EChatMode chatMode, ref bool _cancel) =>
             {
-                var @event = EventHandlers.PlayerMessage(player, chatMode, message);
+                var @event = EventHandlers.PlayerMessage(player, color, chatMode, message);
                 BroadcastEvent(EventType.PlayerMessage, @event);
+            };
+
+            U.Events.OnPlayerConnected += (player) =>
+            {
+                var @event = EventHandlers.PlayerJoinedOrLeft(player);
+                BroadcastEvent(EventType.PlayerJoined, @event);
+            };
+
+            U.Events.OnPlayerDisconnected += (player) =>
+            {
+                var @event = EventHandlers.PlayerJoinedOrLeft(player);
+                BroadcastEvent(EventType.PlayerLeft, @event);
             };
         }
 

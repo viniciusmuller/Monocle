@@ -40,5 +40,7 @@ namespace Monocle.Api
     {
         PlayerDeath,
         PlayerMessage,
+        PlayerJoined,
+        PlayerLeft,
     }
 }
