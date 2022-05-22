@@ -2,6 +2,7 @@
 using Monocle.Exceptions;
 using Monocle.Models;
 using SDG.Unturned;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,16 +21,21 @@ namespace Monocle.Services
             return playerModels;
         }
         
-        public PlayerModel GetPlayerInfo(string? userId)
+        public PlayerDetailsModel GetPlayerDetails(ulong? userId)
         {
-            var client = Provider.clients.Where(p => p.playerID.steamID.ToString() == userId).FirstOrDefault();
-            if (client == null)
+            if (userId == null)
+            {
+                throw new ApiException(ErrorType.InvalidRequestData, $"userId was not provided");
+            }
+
+            var result = Utils.TryGetPlayer(userId.Value, out var client);
+            if (!result)
             {
                 throw new ApiException(ErrorType.UserNotFound, $"The user of ID {userId} was not found in the server.");
             }
 
-            var playerInventory = FetchInventoryItems(client);
-            return new PlayerModel(client, playerInventory);
+            var playerInventory = FetchInventoryItems(client.player.inventory.items);
+            return new PlayerDetailsModel(client, playerInventory);
         }
 
         public List<BarricadeModel> GetBarricades()
@@ -37,7 +43,7 @@ namespace Monocle.Services
             var barricades = BarricadeManager.regions.Cast<BarricadeRegion>()
                                                      .SelectMany(x => x.drops);
 
-            var barricadeModels = barricades.Select(s => new BarricadeModel(s));
+            var barricadeModels = barricades.Select(b => new BarricadeModel(b));
             return barricadeModels.ToList();
         }
 
@@ -62,10 +68,10 @@ namespace Monocle.Services
             return vehicleModels.ToList();
         }
 
-        List<ItemModel> FetchInventoryItems(SteamPlayer player)
+        public List<ItemModel> FetchInventoryItems(Items[] inventory)
         {
             var playerInventory = new List<ItemModel>();
-            foreach (var itemPack in player.player.inventory.items)
+            foreach (var itemPack in inventory)
             {
                 if (itemPack == null)
                 {
@@ -74,8 +80,7 @@ namespace Monocle.Services
 
                 foreach (var item in itemPack.items)
                 {
-                    var itemName = Assets.find(EAssetType.ITEM, item.item.id).FriendlyName;
-                    playerInventory.Add(new ItemModel(item, itemName));
+                    playerInventory.Add(new ItemModel(item, item.GetName()));
                 }
             }
             return playerInventory;

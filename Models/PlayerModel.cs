@@ -1,4 +1,5 @@
-﻿using SDG.Unturned;
+﻿using Rocket.Unturned.Player;
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,29 +10,41 @@ namespace Monocle.Models
 {
     internal class PlayerModel
     {
-        public string Id { get; set; }
+        public ulong Id { get; set; }
         public string Name { get; set; }
         public bool IsAdmin { get; set; }
         public int Ping { get; set; }
-        public List<ItemModel> Items { get; set; }
-        public Position? Position { get; set; }
-        public byte? Health { get; set; }
+        public Position Position { get; set; }
+        public byte Health { get; set; }
 
         public PlayerModel(SteamPlayer player)
         {
-            Id = player.playerID.steamID.ToString();
+            Id = player.playerID.steamID.m_SteamID;
             IsAdmin = player.isAdmin;
             Name = player.player.name;
-            Items = new List<ItemModel>();
             Ping = (int)Math.Ceiling(player.ping);
             Position = player.player.transform.position.ToPosition();
-            // Health = client.player.life.health // TODO: Get correct player life
+            Health = player.player.life.health;
         }
 
-        public PlayerModel(SteamPlayer player, List<ItemModel> items) : this(player)
+        public PlayerModel(UnturnedPlayer player)
+        {
+            Id = player.CSteamID.m_SteamID;
+            IsAdmin = player.IsAdmin;
+            Name = player.DisplayName;
+            Ping = (int)Math.Ceiling(player.Ping);
+            Position = player.Position.ToPosition();
+            Health = player.Health;
+        }
+    }
+
+    internal class PlayerDetailsModel : PlayerModel
+    {
+        public List<ItemModel> Items { get; set; }
+
+        public PlayerDetailsModel(SteamPlayer player, List<ItemModel> items) : base(player)
         {
             Items = items;
         }
     }
-
 }

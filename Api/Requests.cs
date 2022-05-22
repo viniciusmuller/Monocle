@@ -17,7 +17,7 @@ namespace Monocle.Api
 
     internal class GetUserInfoRequest
     {
-        public string? UserId { get; set; }
+        public ulong? UserId { get; set; }
     }
 
     internal class BaseRequest

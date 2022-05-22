@@ -10,13 +10,14 @@ namespace Monocle.Api
     {
         InvalidRequestType,
         UserNotFound,
+        InvalidRequestData,
     }
 
     internal enum RequestType
     {
         Authenticate,
         GetPlayers,
-        GetPlayerInfo,
+        GetPlayerDetails,
         GetStructures,
         GetBarricades,
         GetVehicles,
@@ -37,6 +38,7 @@ namespace Monocle.Api
 
     internal enum EventType
     {
-        PlayerDied,
+        PlayerDeath,
+        PlayerMessage,
     }
 }

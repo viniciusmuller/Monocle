@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Rocket.Core.Logging;
+using Rocket.Unturned.Events;
+using Rocket.Unturned.Player;
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +21,20 @@ namespace Monocle.Services
     internal class ServerService
     {
         WebSocketServer SocketServer { get; set; }
-        Dictionary<Guid, AuthorizedUser> LoggedInUsers { get; set; }
+        Dictionary<Guid, (IWebSocketConnection, AuthorizedUser)> LoggedInUsers { get; set; }
         MonocleConfiguration Config { get; set; }
         UnturnedService UnturnedService { get; set; }
 
         public ServerService(MonocleConfiguration config, UnturnedService unturnedService)
         {
             Config = config;
-            LoggedInUsers = new Dictionary<Guid, AuthorizedUser>();
+            LoggedInUsers = new();
             UnturnedService = unturnedService;
         }
 
         public void Start(string ip, int? port)
         {
+            BindListeners();
             var host = $"ws://{IPAddress.Parse(ip)}:{port}";
             SocketServer = new WebSocketServer(host);
             Logger.Log($"Starting WebSocket server at {host}");
@@ -48,6 +52,31 @@ namespace Monocle.Services
             SocketServer.Dispose();
         }
 
+        void BindListeners()
+        {
+            UnturnedPlayerEvents.OnPlayerDeath += (deadPlayer, cause, limb, murdererId) =>
+            {
+                var @event = EventHandlers.PlayerDeath(deadPlayer, murdererId, cause);
+                BroadcastEvent(EventType.PlayerDeath, @event);
+            };
+
+            UnturnedPlayerEvents.OnPlayerChatted += (UnturnedPlayer player, ref UnityEngine.Color _color, string message, EChatMode chatMode, ref bool _cancel) =>
+            {
+                var @event = EventHandlers.PlayerMessage(player, chatMode, message);
+                BroadcastEvent(EventType.PlayerMessage, @event);
+            };
+        }
+
+        void BroadcastEvent(EventType type, Event @event)
+        {
+            var baseEvent = new BaseEvent(type, @event);
+            foreach (var (socket, _) in LoggedInUsers.Values)
+            {
+                var payload = JsonConvert.SerializeObject(baseEvent);
+                socket.Send(payload);
+            }
+        }
+
         void HandleOpen(IWebSocketConnection socket)
         {
             Logger.Log($"New connection from {socket.ConnectionInfo.Host}");
@@ -59,7 +88,7 @@ namespace Monocle.Services
 
             if (LoggedInUsers.ContainsKey(socket.ConnectionInfo.Id))
             {
-                var user = LoggedInUsers[socket.ConnectionInfo.Id];
+                var (_, user) = LoggedInUsers[socket.ConnectionInfo.Id];
                 Logger.Log($"User {user.Username} logged off");
                 LoggedInUsers.Remove(socket.ConnectionInfo.Id);
             }
@@ -96,7 +125,7 @@ namespace Monocle.Services
                     var response = new BaseResponse<string>(ResponseType.SuccessfulLogin, "Authentication succeeded");
                     SendResponse(socket, response);
                     Logger.LogWarning($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
-                    LoggedInUsers[socket.ConnectionInfo.Id] = user;
+                    LoggedInUsers[socket.ConnectionInfo.Id] = (socket, user);
                 }
                 else
                 {
@@ -113,9 +142,9 @@ namespace Monocle.Services
                 case RequestType.GetPlayers:
                     var playerModels = UnturnedService.GetPlayers();
                     return new BaseResponse<List<PlayerModel>>(ResponseType.Players, playerModels);
-                case RequestType.GetPlayerInfo:
+                case RequestType.GetPlayerDetails:
                     var requestData = JsonConvert.DeserializeObject<GetUserInfoRequest>(payload);
-                    var player = UnturnedService.GetPlayerInfo(requestData?.UserId);
+                    var player = UnturnedService.GetPlayerDetails(requestData?.UserId);
                     return new BaseResponse<PlayerModel>(ResponseType.PlayerInfo, player);
                 case RequestType.GetStructures:
                     // Structs are floors, walls, roofs, stairs, etc

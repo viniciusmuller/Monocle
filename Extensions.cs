@@ -1,5 +1,7 @@
-﻿using Monocle.Models;
+﻿using Monocle.Api;
+using Monocle.Models;
 using Monocle.Services;
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,24 @@ namespace Monocle
                 x = v.x,
                 y = v.y,
                 z = v.z,
+            };
+        }
+
+        public static string GetName(this ItemJar item)
+        {
+            return Assets.find(EAssetType.ITEM, item.item.id).FriendlyName;
+        }
+
+        public static ChatMode ToMonocleChatMode(this EChatMode chatMode)
+        {
+            return chatMode switch
+            {
+                EChatMode.LOCAL => ChatMode.Local,
+                EChatMode.GLOBAL => ChatMode.Global,
+                EChatMode.GROUP => ChatMode.Group,
+                EChatMode.SAY => ChatMode.Say,
+                EChatMode.WELCOME => ChatMode.Welcome,
+                _ => throw new ArgumentException($"Invalid chat mode {chatMode}")
             };
         }
     }

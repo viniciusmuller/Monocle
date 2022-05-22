@@ -24,20 +24,9 @@ namespace Monocle.Api
         }
     }
 
-    internal class InformativeResponse : Response
-    {
-        public string Message { get; set; }
-
-        public InformativeResponse(string message)
-        {
-            Message = message;
-        }
-    }
-
     internal class WorldSizeResponse : Response
     {
         // Apparently all of unturned maps are square
         public int Size { get; set; }
     }
-
 }

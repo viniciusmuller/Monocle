@@ -2,6 +2,7 @@
 using Monocle.Services;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
+using Rocket.Unturned;
 
 namespace Monocle
 {
