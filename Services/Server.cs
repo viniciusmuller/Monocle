@@ -8,19 +8,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using static Monocle.Extensions;
 
 namespace Monocle.Services
 {
     internal class Server
     {
         WebSocketServer SocketServer { get; set; }
-        HashSet<Guid> LoggedInUsers { get; set; }
+        Dictionary<Guid, AuthorizedUser> LoggedInUsers { get; set; }
         MonocleConfiguration Config { get; set; }
 
         public Server(MonocleConfiguration config)
         {
             Config = config;
-            LoggedInUsers = new HashSet<Guid>();
+            LoggedInUsers = new Dictionary<Guid, AuthorizedUser>();
         }
 
         public void Start(string ip, int port)
@@ -51,15 +52,17 @@ namespace Monocle.Services
         {
             Logger.Log($"Closed connection from {socket.ConnectionInfo.Host}");
 
-            if (LoggedInUsers.Contains(socket.ConnectionInfo.Id))
+            if (LoggedInUsers.ContainsKey(socket.ConnectionInfo.Id))
             {
+                var user = LoggedInUsers[socket.ConnectionInfo.Id];
+                Logger.Log($"User {user.Username} logged off");
                 LoggedInUsers.Remove(socket.ConnectionInfo.Id);
             }
         }
 
         void HandleMessage(IWebSocketConnection socket, string payload)
         {
-            var isAuthenticated = LoggedInUsers.Contains(socket.ConnectionInfo.Id);
+            var isAuthenticated = LoggedInUsers.ContainsKey(socket.ConnectionInfo.Id);
 
             var type = GetRequestType(payload);
             if (type == null)
@@ -72,11 +75,13 @@ namespace Monocle.Services
             }
             else
             {
-                if (Authenticate(payload))
+                var user = Authenticate(payload);
+                if (user != null)
                 {
                     var response = new SuccesfulLoginResponse { Message = "Authentication succeeded" };
                     SendResponse(socket, ResponseType.SuccessfulLogin, response);
-                    LoggedInUsers.Add(socket.ConnectionInfo.Id);
+                    Logger.LogWarning($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
+                    LoggedInUsers[socket.ConnectionInfo.Id] = user;
                 }
                 else
                 {
@@ -93,28 +98,28 @@ namespace Monocle.Services
             {
                 case RequestType.GetPlayers:
                     var players = SDG.Unturned.Provider.clients;
-                    var playerModels = players.ConvertAll(p => new Player
-                    {
-                        // TODO: Get how much time the player is in the server (p.joined returns a float, find out what its format)
-                        Name = p.player.name,
-                        IsAdmin = p.isAdmin,
-                        Ping = (int)Math.Ceiling(p.ping),
-                    });
+                    var playerModels = players.ConvertAll(p => new Player(p));
                     SendResponse(socket, ResponseType.Players, playerModels);
                     break;
                 case RequestType.GetPlayerInfo:
-                    throw new NotImplementedException();
+                    var requestData = JsonConvert.DeserializeObject<GetUserInfoRequest>(payload);
+                    var client = SDG.Unturned.Provider.clients.Where(p => p.playerID.steamID.ToString() == requestData?.UserId).FirstOrDefault();
+                    if (client == null)
+                    {
+                        SendError(socket, ErrorType.UserNotFound, $"The user of ID {requestData?.UserId} was not found in the server.");
+                        return;
+                    }
+
+                    var playerInventory = FetchInventoryItems(client);
+                    var player = new Player(client, playerInventory);
+                    SendResponse(socket, ResponseType.PlayerInfo, player);
+                    break;
                 case RequestType.GetStructures:
                     // Structs are floors, walls, roofs, stairs, etc
                     var structures = SDG.Unturned.StructureManager.regions.Cast<SDG.Unturned.StructureRegion>()
                                                                           .SelectMany(x => x.drops);
 
-                    var structureModels = structures.Select(s => new Structure
-                    {
-                        Name = s.asset.name,
-                        Position = Vector3ToPosition(s.model.position),
-                        Health = s.asset.health
-                    }).ToList();
+                    var structureModels = structures.Select(s => new Structure(s)).ToList();
                     SendResponse(socket, ResponseType.Structures, structureModels);
                     break;
                 case RequestType.GetBarricades:
@@ -122,56 +127,65 @@ namespace Monocle.Services
                     var barricades = SDG.Unturned.BarricadeManager.regions.Cast<SDG.Unturned.BarricadeRegion>()
                                                                           .SelectMany(x => x.drops);
 
-                    var barricadeModels = barricades.Select(s => new Barricade
-                    {
-                        Name = s.asset.name,
-                        Position = Vector3ToPosition(s.model.position),
-                        Health = s.asset.health
-                    }).ToList();
+                    var barricadeModels = barricades.Select(s => new Barricade(s)).ToList();
                     SendResponse(socket, ResponseType.Barricades, barricadeModels);
                     break;
                 case RequestType.GetVehicles:
                     var vehicles = SDG.Unturned.VehicleManager.vehicles;
-                    var vehicleModels = vehicles.Select(v => new Vehicle {
-                        IsLocked = v.isLocked,
-                        Name = v.name,
-                        // TODO: Find who locked the vehicle (owner)
-                        // Position = Vector3ToPosition() // TODO: Find exact vehicle position
+                    var vehicleModels = vehicles.Select(v =>
+                    {
+                        var name = SDG.Unturned.Assets.find(SDG.Unturned.EAssetType.VEHICLE, v.id).FriendlyName;
+                        return new Vehicle(v, name);
                     }).ToList();
                     SendResponse(socket, ResponseType.Vehicles, vehicleModels);
+                    break;
+                case RequestType.GetWorldSize:
+                    // TODO: Fix this
+                    //var worldSize = SDG.Unturned.Regions.WORLD_SIZE * SDG.Unturned.Regions.REGION_SIZE;
+                    var model = new WorldSizeResponse() { Size = 2048 };
+                    SendResponse(socket, ResponseType.WorldSize, model);
                     break;
             }
         }
 
-        Position Vector3ToPosition(UnityEngine.Vector3 v)
+        List<Item> FetchInventoryItems(SDG.Unturned.SteamPlayer player)
         {
-            return new Position
+            var playerInventory = new List<Item>();
+            foreach (var itemPack in player.player.inventory.items)
             {
-                x = v.x,
-                y = v.y,
-                z = v.z,
-            };
+                if (itemPack == null)
+                {
+                    continue;
+                }
+
+                foreach (var item in itemPack.items)
+                {
+                    var itemName = SDG.Unturned.Assets.find(SDG.Unturned.EAssetType.ITEM, item.item.id).FriendlyName;
+                    playerInventory.Add(new Item(item, itemName));
+                }
+            }
+            return playerInventory;
         }
 
-        bool Authenticate(string message)
+        AuthorizedUser? Authenticate(string message)
         {
-            var payload = JsonConvert.DeserializeObject<LoginPayload>(message);
+            var payload = JsonConvert.DeserializeObject<LoginRequest>(message);
             if (payload == null)
             {
-                return false;
+                return null;
             }
 
-            return AreCredentialsValid(payload.Username, payload.Password);
+            return TryToLogin(payload.Username, payload.Password);
         }
 
-        bool AreCredentialsValid(string username, string password) =>
-            Config.AuthorizedUsers.Any(au => au.Username == username && au.Password == password);
+        AuthorizedUser? TryToLogin(string username, string password) =>
+           Config.AuthorizedUsers.Where(au => au.Username == username && au.Password == password).FirstOrDefault();
 
         RequestType? GetRequestType(string message)
         {
             // All requests sent by clients must have a "type" field.
             var baseRequest = JsonConvert.DeserializeObject<BaseRequest>(message);
-            return baseRequest.Type;
+            return baseRequest?.Type;
         }
 
         void SendResponse<T>(IWebSocketConnection socket, ResponseType type, T data)
@@ -179,7 +193,8 @@ namespace Monocle.Services
             var response = new BaseResponse<T>
             {
                 Type = type,
-                Data = data
+                Data = data,
+                Status = "Success"
             };
             var serialized = JsonConvert.SerializeObject(response);
             socket.Send(serialized);
@@ -187,16 +202,21 @@ namespace Monocle.Services
 
         void SendError(IWebSocketConnection socket, ErrorType type, string message)
         {
-            var errorModel = new ErrorModel { Type = type, Message = message };
+            var errorModel = new ErrorModel { Type = type, Message = message, Status = "Error" };
             var payload = JsonConvert.SerializeObject(errorModel);
             socket.Send(payload);
         }
     }
 
-    class LoginPayload
+    class LoginRequest
     {
         public string Username { get; set; }
         public string Password { get; set; }
+    }
+
+    class GetUserInfoRequest
+    {
+        public string UserId { get; set; }
     }
 
     class BaseResponse<T>
@@ -205,6 +225,7 @@ namespace Monocle.Services
         public ResponseType Type { get; set; }
 
         public T Data { get; set; }
+        public string Status { get; set; }
     }
 
     class InformativeResponse
@@ -212,13 +233,28 @@ namespace Monocle.Services
         public string Message { get; set; }
     }
 
+    class WorldSizeResponse
+    {
+        // Apparently all of unturned maps are square
+        public int Size { get; set; }
+    }
+
     class SuccesfulLoginResponse : InformativeResponse { }
 
     class Vehicle
     {
-        public bool IsLocked;
+        public bool IsLocked { get; set; }
         public string Name { get; set; }
         public Position Position { get; set; }
+        public ushort Id { get; set; }
+
+        public Vehicle(SDG.Unturned.InteractableVehicle vehicle, string vehicleName)
+        {
+            IsLocked = vehicle.isLocked;
+            Id = vehicle.id;
+            Name = vehicleName;
+            Position = vehicle.transform.position.ToPosition();
+        }
     }
 
     abstract class PlayerBuilding
@@ -228,8 +264,25 @@ namespace Monocle.Services
         public float Health { get; set; }
     }
 
-    class Structure : PlayerBuilding { }
-    class Barricade : PlayerBuilding { }
+    class Structure : PlayerBuilding
+    {
+        public Structure(SDG.Unturned.StructureDrop drop)
+        {
+            Name = drop.asset.name;
+            Position = drop.model.position.ToPosition();
+            Health = drop.asset.health;
+        }
+    }
+
+    class Barricade : PlayerBuilding
+    {
+        public Barricade(SDG.Unturned.BarricadeDrop drop)
+        {
+            Name = drop.asset.name;
+            Position = drop.model.position.ToPosition();
+            Health = drop.asset.health;
+        }
+    }
 
     class Position
     {
@@ -240,9 +293,45 @@ namespace Monocle.Services
 
     class Player
     {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public bool IsAdmin { get; set; }
+        public int Ping { get; set; }
+        public List<Item> Items { get; set; }
+        public Position? Position { get; set; }
+        public byte? Health { get; set; }
+
+        public Player(SDG.Unturned.SteamPlayer player)
+        {
+            Id = player.playerID.steamID.ToString();
+            IsAdmin = player.isAdmin;
+            Name = player.player.name;
+            Items = new List<Item>();
+            Ping = (int)Math.Ceiling(player.ping);
+            Position = player.player.transform.position.ToPosition();
+            // Health = client.player.life.health // TODO: Get correct player life
+        }
+
+        public Player(SDG.Unturned.SteamPlayer player, List<Item> items) : this(player)
+        {
+            Items = items;
+        }
+    }
+
+    class Item
+    {
         public string Name;
-        public bool IsAdmin;
-        public int Ping;
+        public int Amount;
+        public ushort Id;
+        public byte Durability;
+
+        public Item(SDG.Unturned.ItemJar item, string name)
+        {
+            Amount = item.item.amount;
+            Name = name;
+            Durability = item.item.durability;
+            Id = item.item.id;
+        }
     }
 
     class ErrorModel
@@ -250,6 +339,7 @@ namespace Monocle.Services
         [JsonConverter(typeof(StringEnumConverter))]
         public ErrorType Type { get; set; }
 
+        public string Status;
         public string Message { get; set; }
     }
 
@@ -262,6 +352,7 @@ namespace Monocle.Services
     enum ErrorType
     {
         InvalidRequestType,
+        UserNotFound,
     }
 
     enum RequestType
@@ -272,6 +363,7 @@ namespace Monocle.Services
         GetStructures,
         GetBarricades,
         GetVehicles,
+        GetWorldSize,
     }
 
     enum ResponseType
@@ -283,6 +375,7 @@ namespace Monocle.Services
         Vehicles,
         Barricades,
         Structures,
+        WorldSize,
     }
 
     enum EventType
