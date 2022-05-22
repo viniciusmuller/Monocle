@@ -12,9 +12,9 @@ namespace Monocle
         protected override void Load()
         {
             Logger.Log($"{Name} {Assembly.GetName().Version} has been loaded!");
-            server = new Server();
             var bindAddress = Configuration.Instance.BindAddress;
             var listenPort = Configuration.Instance.ListenPort;
+            server = new Server(Configuration.Instance);
             server.Start(bindAddress, listenPort);
         }
 

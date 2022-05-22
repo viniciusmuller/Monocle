@@ -15,4 +15,5 @@
 - Build the project using Visual Studio
 - Copy the generated `obj/Debug/net461/Monocle.dll` to the `Servers/YourServer/Rocket/Plugins` folder.
 - Copy the generated `bin/Debug/net461/Fleck.dll` to the `Servers/YourServer/Rocket/Libraries` folder.
+- Copy the generated `bin/Debug/net461/Newtonsoft.Json.dll` to the `Servers/YourServer/Rocket/Libraries` folder.
 
