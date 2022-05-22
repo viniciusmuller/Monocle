@@ -57,22 +57,22 @@ namespace Monocle.Services
             }
         }
 
-        void HandleMessage(IWebSocketConnection socket, string message)
+        void HandleMessage(IWebSocketConnection socket, string payload)
         {
             var isAuthenticated = LoggedInUsers.Contains(socket.ConnectionInfo.Id);
 
-            var type = GetRequestType(message);
+            var type = GetRequestType(payload);
             if (type == null)
             {
                 SendError(socket, ErrorType.InvalidRequestType, "The request type was not provided or invalid");
             }
             else if (isAuthenticated)
             {
-                ServeRequest(socket, type);
+                ServeRequest(socket, type, payload);
             }
             else
             {
-                if (Authenticate(message))
+                if (Authenticate(payload))
                 {
                     var response = new SuccesfulLoginResponse { Message = "Authentication succeeded" };
                     SendResponse(socket, ResponseType.SuccessfulLogin, response);
@@ -81,25 +81,76 @@ namespace Monocle.Services
                 else
                 {
                     // We don't send an error message because the socket closes before it receives the message
-                    // socket.Close();
-                    Logger.LogWarning("damn son");
-                    Logger.Log(message);
+                    socket.Close();
                 }
             }
         }
 
         // TODO: This should return a response or error object
-        void ServeRequest(IWebSocketConnection socket, RequestType? type)
+        void ServeRequest(IWebSocketConnection socket, RequestType? type, string payload)
         {
             switch (type)
             {
                 case RequestType.GetPlayers:
-                    throw new NotImplementedException();
+                    var players = SDG.Unturned.Provider.clients;
+                    var playerModels = players.ConvertAll(p => new Player
+                    {
+                        // TODO: Get how much time the player is in the server (p.joined returns a float, find out what its format)
+                        Name = p.player.name,
+                        IsAdmin = p.isAdmin,
+                        Ping = (int)Math.Ceiling(p.ping),
+                    });
+                    SendResponse(socket, ResponseType.Players, playerModels);
+                    break;
                 case RequestType.GetPlayerInfo:
                     throw new NotImplementedException();
-                case RequestType.GetBuildings:
-                    throw new NotImplementedException();
+                case RequestType.GetStructures:
+                    // Structs are floors, walls, roofs, stairs, etc
+                    var structures = SDG.Unturned.StructureManager.regions.Cast<SDG.Unturned.StructureRegion>()
+                                                                          .SelectMany(x => x.drops);
+
+                    var structureModels = structures.Select(s => new Structure
+                    {
+                        Name = s.asset.name,
+                        Position = Vector3ToPosition(s.model.position),
+                        Health = s.asset.health
+                    }).ToList();
+                    SendResponse(socket, ResponseType.Structures, structureModels);
+                    break;
+                case RequestType.GetBarricades:
+                    // Barricades are everything that can be stick into cars: lockers, wardrobes, metal plates, etc
+                    var barricades = SDG.Unturned.BarricadeManager.regions.Cast<SDG.Unturned.BarricadeRegion>()
+                                                                          .SelectMany(x => x.drops);
+
+                    var barricadeModels = barricades.Select(s => new Barricade
+                    {
+                        Name = s.asset.name,
+                        Position = Vector3ToPosition(s.model.position),
+                        Health = s.asset.health
+                    }).ToList();
+                    SendResponse(socket, ResponseType.Barricades, barricadeModels);
+                    break;
+                case RequestType.GetVehicles:
+                    var vehicles = SDG.Unturned.VehicleManager.vehicles;
+                    var vehicleModels = vehicles.Select(v => new Vehicle {
+                        IsLocked = v.isLocked,
+                        Name = v.name,
+                        // TODO: Find who locked the vehicle (owner)
+                        // Position = Vector3ToPosition() // TODO: Find exact vehicle position
+                    }).ToList();
+                    SendResponse(socket, ResponseType.Vehicles, vehicleModels);
+                    break;
             }
+        }
+
+        Position Vector3ToPosition(UnityEngine.Vector3 v)
+        {
+            return new Position
+            {
+                x = v.x,
+                y = v.y,
+                z = v.z,
+            };
         }
 
         bool Authenticate(string message)
@@ -163,6 +214,37 @@ namespace Monocle.Services
 
     class SuccesfulLoginResponse : InformativeResponse { }
 
+    class Vehicle
+    {
+        public bool IsLocked;
+        public string Name { get; set; }
+        public Position Position { get; set; }
+    }
+
+    abstract class PlayerBuilding
+    {
+        public string Name { get; set; }
+        public Position Position { get; set; }
+        public float Health { get; set; }
+    }
+
+    class Structure : PlayerBuilding { }
+    class Barricade : PlayerBuilding { }
+
+    class Position
+    {
+        public float x;
+        public float y;
+        public float z;
+    }
+
+    class Player
+    {
+        public string Name;
+        public bool IsAdmin;
+        public int Ping;
+    }
+
     class ErrorModel
     {
         [JsonConverter(typeof(StringEnumConverter))]
@@ -187,16 +269,20 @@ namespace Monocle.Services
         Authenticate,
         GetPlayers,
         GetPlayerInfo,
-        GetBuildings,
+        GetStructures,
+        GetBarricades,
+        GetVehicles,
     }
 
     enum ResponseType
     {
-        TotalPlayers,
+        Players,
         PlayerInfo,
         CurrentBuildings,
         SuccessfulLogin,
-        AuthenticationFailed,
+        Vehicles,
+        Barricades,
+        Structures,
     }
 
     enum EventType

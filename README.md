@@ -1,15 +1,20 @@
 # Building
 
-## Framework version
-.NET 4.6.1
+## .NET Framework version
+.NET 4.8
 
 ## Libraries
-- UnityEngine.dll
-- UnityEngine.CoreModule.dll
-- Assembly-CSharp.dll
-- Rocket.Unturned.dll
-- Rocket.Core.dll
-- Rocket.API.dll
+These can be found inside the game's folder, you just need to add them as
+references into the Visual Studio Project.
+
+- UnityEngine.CoreModule          - Unturned\Unturned_Data\Managed
+- UnityEngine                     - Unturned\Unturned_Data\Managed
+- Assembly-CSharp                 - Unturned\Unturned_Data\Managed
+- com.rlabrecque.steamworks.net   - Unturned\Unturned_Data\Managed
+- Rocket.API                      - Unturned\Extras\Rocket.Unturned
+- Rocket.Core                     - Unturned\Extras\Rocket.Unturned
+- Rocket.Unturned                 - Unturned\Extras\Rocket.Unturned
+- SDG.NetTransport                - Unturned\Unturned_Data\Managed
 
 # Running
 - Build the project using Visual Studio
