@@ -9,10 +9,10 @@ namespace Monocle.Config
 {
     public class MonocleConfiguration : IRocketPluginConfiguration
     {
-        public string BindAddress { get; set; }
-        public int ListenPort { get; set; }
-        public List<AuthorizedUser> AuthorizedUsers { get; set; }
-        public int MaxFailedLoginAttempts { get; set; }
+        public string? BindAddress { get; set; }
+        public int? ListenPort { get; set; }
+        public List<AuthorizedUser>? AuthorizedUsers { get; set; }
+        public int? MaxFailedLoginAttempts { get; set; }
 
         public void LoadDefaults()
         {
@@ -27,7 +27,7 @@ namespace Monocle.Config
 
     public class AuthorizedUser
     {
-        public string Username { get; set; }
-        public string Password { get; set; } // TODO: Maybe use password hash
+        public string? Username { get; set; }
+        public string? Password { get; set; } // TODO: Maybe use password hash
     }
 }

@@ -1,4 +1,5 @@
-﻿using Monocle.Services;
+﻿using Monocle.Models;
+using Monocle.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
