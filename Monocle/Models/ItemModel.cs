@@ -14,12 +14,20 @@ namespace Monocle.Models
         public ushort Id;
         public byte Durability;
 
-        public ItemModel(ItemJar item, string name)
+        public ItemModel(ItemJar item, string friendlyName)
         {
             Amount = item.item.amount;
-            Name = name;
+            Name = friendlyName;
             Durability = item.item.durability;
             Id = item.item.id;
+        }
+
+        public ItemModel(ItemAsset item, byte durability)
+        {
+            Amount = item.amount;
+            Name = item.FriendlyName;
+            Durability = durability;
+            Id = item.id;
         }
     }
 }

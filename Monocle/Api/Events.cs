@@ -44,7 +44,7 @@ namespace Monocle.Api
 
     class PlayerMessageEvent : Event
     {
-        public PlayerModel Player;
+        public PlayerModel Author;
         public string Message;
         public string ColorHex;
 
@@ -53,7 +53,7 @@ namespace Monocle.Api
 
         public PlayerMessageEvent(PlayerModel player, Color color, EChatMode chatMode, string message)
         {
-            Player = player;
+            Author = player;
             Message = message;
             ChatMode = chatMode.ToMonocleChatMode();
             ColorHex = ColorUtility.ToHtmlStringRGB(color);

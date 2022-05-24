@@ -43,4 +43,10 @@ namespace Monocle.Api
         PlayerJoined,
         PlayerLeft,
     }
+
+    public enum AuthorizedUserType
+    {
+        Observer,
+        Administrator
+    }
 }

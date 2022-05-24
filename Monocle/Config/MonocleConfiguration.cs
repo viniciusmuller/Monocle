@@ -1,4 +1,5 @@
-﻿using Rocket.API;
+﻿using Monocle.Api;
+using Rocket.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,19 @@ namespace Monocle.Config
 {
     public class MonocleConfiguration : IRocketPluginConfiguration
     {
-        public string? BindAddress { get; set; }
-        public int? ListenPort { get; set; }
-        public List<AuthorizedUser>? AuthorizedUsers { get; set; }
-        public int? MaxFailedLoginAttempts { get; set; }
+        public string BindAddress { get; set; }
+        public int ListenPort { get; set; }
+        public List<AuthorizedUser> AuthorizedUsers { get; set; }
+        public int MaxFailedLoginAttempts { get; set; }
 
         public void LoadDefaults()
         {
-            var defaultAdmin = new AuthorizedUser() { Username = "admin", Password = "potato" };
+            var defaultAdmin = new AuthorizedUser()
+            {
+                Username = "admin",
+                Password = "potato",
+                Type = AuthorizedUserType.Administrator
+            };
 
             ListenPort = 55554;
             BindAddress = "127.0.0.1";
@@ -29,5 +35,6 @@ namespace Monocle.Config
     {
         public string? Username { get; set; }
         public string? Password { get; set; } // TODO: Maybe use password hash
+        public AuthorizedUserType? Type { get; set; }
     }
 }

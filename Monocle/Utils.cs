@@ -21,5 +21,10 @@ namespace Monocle
             var id = new CSteamID(playerId);
             return TryGetPlayer(id, out player);
         }
+
+        public static ItemAsset? FindItem(ushort id)
+        {
+            return (ItemAsset)Assets.find(EAssetType.ITEM, id);
+        }
     }
 }

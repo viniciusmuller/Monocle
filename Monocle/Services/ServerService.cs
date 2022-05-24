@@ -33,7 +33,7 @@ namespace Monocle.Services
             UnturnedService = unturnedService;
         }
 
-        public void Start(string ip, int? port)
+        public void Start(string ip, int port)
         {
             BindListeners();
             var host = $"ws://{IPAddress.Parse(ip)}:{port}";
@@ -63,6 +63,8 @@ namespace Monocle.Services
 
             UnturnedPlayerEvents.OnPlayerChatted += (UnturnedPlayer player, ref UnityEngine.Color color, string message, EChatMode chatMode, ref bool _cancel) =>
             {
+                // TODO: If message starts with /, then it's a command, but can we check if the command failed or succeeded?
+
                 var @event = EventHandlers.PlayerMessage(player, color, chatMode, message);
                 BroadcastEvent(EventType.PlayerMessage, @event);
             };
