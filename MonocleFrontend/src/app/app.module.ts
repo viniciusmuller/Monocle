@@ -8,11 +8,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { ServerDashboardComponent } from './server-dashboard/server-dashboard.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LoginComponentComponent } from './login-component/login-component.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ServerDashboardComponent
+    ServerDashboardComponent,
+    LoginComponentComponent
   ],
   imports: [
     BrowserModule,
@@ -20,7 +23,8 @@ import { ServerDashboardComponent } from './server-dashboard/server-dashboard.co
     BrowserAnimationsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -13,6 +13,13 @@ namespace Monocle.Api
         InvalidRequestData,
     }
 
+    internal enum MessageKind
+    {
+        Response,
+        Event,
+        Error
+    }
+
     internal enum RequestType
     {
         Authenticate,
@@ -21,7 +28,7 @@ namespace Monocle.Api
         GetStructures,
         GetBarricades,
         GetVehicles,
-        GetWorldSize,
+        ServerInfo,
     }
 
     internal enum ResponseType
@@ -33,7 +40,7 @@ namespace Monocle.Api
         Vehicles,
         Barricades,
         Structures,
-        WorldSize,
+        ServerInfo,
     }
 
     internal enum EventType

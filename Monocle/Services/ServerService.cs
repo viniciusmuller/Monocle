@@ -172,10 +172,13 @@ namespace Monocle.Services
                 case RequestType.GetVehicles:
                     var vehicles = UnturnedService.GetVehicles();
                     return new BaseResponse<List<VehicleModel>>(ResponseType.Vehicles, vehicles);
-                case RequestType.GetWorldSize:
-                    // TODO: Fix this
-                    var worldSize = 2048;
-                    return new BaseResponse<int>(ResponseType.WorldSize, worldSize);
+                case RequestType.ServerInfo:
+                    // TODO: Get this data and move this to UnturnedService
+                    var serverInfo = new ServerInfoModel
+                    {
+                        WorldSize = 2048,
+                    };
+                    return new BaseResponse<ServerInfoModel>(ResponseType.ServerInfo, serverInfo);
                 default:
                     throw new ArgumentException("We should never get an invalid request type here");
             }

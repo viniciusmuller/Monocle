@@ -19,6 +19,9 @@ namespace Monocle.Api
         [JsonConverter(typeof(StringEnumConverter))]
         public EventType Type;
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MessageKind Kind = MessageKind.Event;
+
         public Event Data;
 
         public BaseEvent(EventType type, Event data)

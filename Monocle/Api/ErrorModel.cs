@@ -12,6 +12,10 @@ namespace Monocle.Api
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ErrorType Type { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MessageKind Kind = MessageKind.Error;
+
         public string Message { get; set; }
 
         public ErrorModel(ErrorType type, string message)

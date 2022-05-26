@@ -15,6 +15,9 @@ namespace Monocle.Api
         [JsonConverter(typeof(StringEnumConverter))]
         public ResponseType Type { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MessageKind Kind = MessageKind.Response;
+
         public T Data { get; set; }
 
         public BaseResponse(ResponseType type, T data)

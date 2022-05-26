@@ -1,27 +1,16 @@
-<div class="flex-center">
-    <h1>Welcome! Connect to a Monocle server.</h1>
-    <div id="login-form">
-
-        <mat-form-field>
-            <mat-label>Host</mat-label>
-            <input matInput placeholder="Host" type="text" />
-        </mat-form-field>
-
-        <mat-form-field>
-            <mat-label>Port</mat-label>
-            <input matInput placeholder="Port" type="number" />
-        </mat-form-field>
-
-        <mat-form-field>
-            <mat-label>Username</mat-label>
-            <input matInput placeholder="Username" type="text" />
-        </mat-form-field>
-
-        <mat-form-field>
-            <mat-label>Password</mat-label>
-            <input matInput placeholder="Password" type="password" />
-        </mat-form-field>
-
-        <button mat-button>Submit</button>
+<div *ngIf="loggedIn; else notLoggedIn">
+    <h1>Hello!</h1>
+    <div>
+        <div *ngFor="let player of players; trackBy: trackPlayer">
+            <h1>{{player.name}}</h1>
+        </div>
     </div>
+    <button mat-button (click)="getPlayers()">Get current players</button>
 </div>
+
+<ng-template #notLoggedIn>
+    <div class="flex-center">
+        <h1>Please connect to a Monocle server.</h1>
+        <app-login-component (onSubmit)="connectAndLogin($event)"></app-login-component>
+    </div>
+</ng-template>

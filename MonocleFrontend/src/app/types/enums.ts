@@ -16,7 +16,7 @@
         GetWorldSize = "GetWorldSize",
     }
 
-    export enum ResponseType
+    export enum ServerResponseType
     {
         Players = "Players",
         PlayerInfo = "PlayerInfo",

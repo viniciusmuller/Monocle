@@ -1,0 +1,23 @@
+<form [formGroup]="loginForm" id="login-form" (submit)="submit()">
+    <mat-form-field>
+        <mat-label>Host</mat-label>
+        <input matInput placeholder="Host" formControlName="host" type="text" />
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Port</mat-label>
+        <input matInput placeholder="Port" formControlName="port" type="number" />
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Username</mat-label>
+        <input matInput placeholder="Username" formControlName="username" type="text" />
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input matInput placeholder="Password" formControlName="password" type="password" />
+    </mat-form-field>
+
+    <button mat-button type="submit">Submit</button>
+</form>
