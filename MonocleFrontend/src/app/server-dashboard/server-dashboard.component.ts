@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Player } from '../types/models';
+import { interval, Observable, of } from 'rxjs';
+import { Barricade, Player } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from './services/websocket.service';
 
@@ -14,6 +14,7 @@ import { WebsocketService } from './services/websocket.service';
 export class ServerDashboardComponent implements OnInit {
   loggedIn: boolean = false;
   players: Player[];
+  barricades: Barricade[];
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -25,26 +26,50 @@ export class ServerDashboardComponent implements OnInit {
   constructor(private websocketService: WebsocketService,
     private cdr: ChangeDetectorRef) {
     this.players = [];
+    this.barricades = [];
   }
 
   ngOnInit(): void {
+    // TODO: These should probably be inside the constructor
+
     this.websocketService.onLoginSuccessful.subscribe(_ => {
       console.log('successfully logged in!');
       this.loggedIn = true;
     })
 
     this.websocketService.onGetPlayers.subscribe(players => {
-      // TODO: This is not being rendered when we get players
       this.players = players;
       this.cdr.detectChanges();
     })
+
+    this.websocketService.onGetBarricades.subscribe(barricades => {
+      this.barricades = barricades;
+      this.cdr.detectChanges();
+    })
+
+    // TODO: Find more elegant approach to these
+    this.getPlayers();
+    const playerFetchInterval = interval(1000);
+    playerFetchInterval.subscribe(() => this.getPlayers())
+
+    this.getBarricades();
+    const barricadeFetchInterval = interval(10000);
+    barricadeFetchInterval.subscribe(() => this.getBarricades())
   }
 
-  trackPlayer(index: number, player: Player) {
+  trackPlayer(_index: number, player: Player) {
     return player.id;
   }
 
   getPlayers() {
-    this.websocketService.getPlayers();
+    if (this.loggedIn) {
+      this.websocketService.getPlayers();
+    }
+  }
+
+  getBarricades() {
+    if (this.loggedIn) {
+      this.websocketService.getBarricades();
+    }
   }
 }

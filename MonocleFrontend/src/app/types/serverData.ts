@@ -8,7 +8,7 @@ export interface LoginPayload {
 }
 
 export interface ServerMessage {
-    Kind: 'Response'         | 'Event'   | 'Error'
-    Type: ServerResponseType | EventType | ErrorType
-    Data: any
+    kind: 'Response'         | 'Event'   | 'Error'
+    type: ServerResponseType | EventType | ErrorType
+    data: any
 }

@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
 import { ServerMessage } from 'src/app/types/serverData';
-import { Player } from 'src/app/types/models';
+import { Barricade, Player } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -15,14 +15,19 @@ export interface ServerResponse {
 export class WebsocketService {
   private subject: AnonymousSubject<MessageEvent> | null = null;
   private connection: Subject<any> | null = null;
+
   public onLoginSuccessful: Subject<void>;
-  public onPlayerMessage: Subject<any>;
   public onGetPlayers: Subject<Player[]>;
+  public onGetBarricades: Subject<Barricade[]>;
+
+  // Events
+  public onPlayerMessage: Subject<any>;
 
   constructor() {
     this.onLoginSuccessful = new Subject();
     this.onPlayerMessage = new Subject();
     this.onGetPlayers = new Subject();
+    this.onGetBarricades = new Subject();
   }
 
   public connect(host: string, port: number) {
@@ -39,8 +44,8 @@ export class WebsocketService {
   handleServerMessage(message: ServerMessage) {
     console.log(message);
     // Response
-    if (message.Kind == 'Response') {
-      const type = message.Type as ServerResponseType;
+    if (message.kind == 'Response') {
+      const type = message.type as ServerResponseType;
 
       switch (type) {
         case ServerResponseType.SuccessfulLogin:
@@ -48,14 +53,18 @@ export class WebsocketService {
           return;
 
         case ServerResponseType.Players:
-          this.onGetPlayers.next(message.Data as Player[]);
+          this.onGetPlayers.next(message.data as Player[]);
+          return;
+
+        case ServerResponseType.Barricades:
+          this.onGetBarricades.next(message.data as Barricade[]);
           return;
       }
     }
     
     // Events
-    if (message.Kind == 'Event') {
-      const type = message.Type as EventType;
+    if (message.kind == 'Event') {
+      const type = message.type as EventType;
 
       switch (type) {
         case EventType.PlayerMessage:
@@ -69,6 +78,10 @@ export class WebsocketService {
 
   public getPlayers() {
     this.sendRequestType(RequestType.GetPlayers, null); 
+  }
+
+  public getBarricades() {
+    this.sendRequestType(RequestType.GetBarricades, null); 
   }
 
   private sendRequestType<T>(type: RequestType, data: T) {

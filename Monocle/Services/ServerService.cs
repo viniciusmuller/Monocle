@@ -4,8 +4,7 @@ using Monocle.Config;
 using Monocle.Exceptions;
 using Monocle.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Rocket.Core.Logging;
 using Rocket.Unturned;
 using Rocket.Unturned.Events;
@@ -26,11 +25,18 @@ namespace Monocle.Services
         MonocleConfiguration Config { get; set; }
         UnturnedService UnturnedService { get; set; }
 
+        JsonSerializerSettings SerializationSettings;
+
         public ServerService(MonocleConfiguration config, UnturnedService unturnedService)
         {
             Config = config;
             LoggedInUsers = new();
             UnturnedService = unturnedService;
+
+            SerializationSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
         }
 
         public void Start(string ip, int port)
@@ -117,17 +123,17 @@ namespace Monocle.Services
             if (type == null)
             {
                 var error = new ErrorModel(ErrorType.InvalidRequestType, "The request type was not provided or invalid");
-                SendResponse(socket, error);
+                SendMessage(socket, error);
             }
             else if (isAuthenticated)
             {
                 try
                 {
                     var response = ServeRequest(type, payload);
-                    SendResponse(socket, response);
+                    SendMessage(socket, response);
                 } catch (ApiException ex)
                 {
-                    SendResponse(socket, ex.ErrorModel);
+                    SendMessage(socket, ex.ErrorModel);
                 }
             }
             else
@@ -138,7 +144,7 @@ namespace Monocle.Services
                 {
                     // TODO: Refactor how responses are handled as data in the code
                     var response = new BaseResponse<string>(ResponseType.SuccessfulLogin, "Authentication succeeded");
-                    SendResponse(socket, response);
+                    SendMessage(socket, response);
                     Logger.LogWarning($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
                     LoggedInUsers[socket.ConnectionInfo.Id] = (socket, user);
                 }
@@ -200,13 +206,13 @@ namespace Monocle.Services
         RequestType? GetRequestType(string message)
         {
             // All requests sent by clients must have a "type" field.
-            var baseRequest = JsonConvert.DeserializeObject<BaseRequest>(message);
+            var baseRequest = JsonConvert.DeserializeObject<BaseRequest>(message, SerializationSettings);
             return baseRequest?.Type;
         }
 
-        void SendResponse(IWebSocketConnection socket, Response response)
+        void SendMessage(IWebSocketConnection socket, Response response)
         {
-            var serialized = JsonConvert.SerializeObject(response);
+            var serialized = JsonConvert.SerializeObject(response, SerializationSettings);
             socket.Send(serialized);
         }
     }

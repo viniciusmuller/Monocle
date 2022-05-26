@@ -1,11 +1,16 @@
 <div *ngIf="loggedIn; else notLoggedIn">
     <h1>Hello!</h1>
     <div>
+        <h2>Players</h2>
         <div *ngFor="let player of players; trackBy: trackPlayer">
-            <h1>{{player.name}}</h1>
+            <p>{{player.name}}</p>
+        </div>
+
+        <h2>Barricades</h2>
+        <div *ngFor="let barricade of barricades">
+            <p>{{barricade.name}}</p>
         </div>
     </div>
-    <button mat-button (click)="getPlayers()">Get current players</button>
 </div>
 
 <ng-template #notLoggedIn>
