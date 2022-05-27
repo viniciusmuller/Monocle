@@ -35,6 +35,7 @@ export interface Player {
     rotation: number;
     reputation: number;
     equipment: Equipment;
+    joined?: number;
 }
 
 interface Building {
@@ -65,6 +66,7 @@ export interface ServerInfo {
     queueSize: number;
     playersInQueue: number;
     worldSize: number;
+    mapImageEncoded: string;
 }
 
 export interface PlayerMessage {
@@ -72,4 +74,15 @@ export interface PlayerMessage {
     content: string;
     chatMode: ChatMode;
     colorHex: string;
+}
+
+export interface PlayerJoinOrLeave {
+    player: Player;
+    time: Date;
+}
+
+export interface PlayerDeath {
+    dead: Player;
+    killer: Player;
+    cause: string;
 }

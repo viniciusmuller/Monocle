@@ -43,6 +43,8 @@ namespace Monocle.Services
 
         public ServerInfoModel GetServerInfo()
         {
+            var mapImage = new byte[10]; // TODO: Read image
+            
             return new ServerInfoModel
             {
                 MapName = Provider.map,
@@ -52,6 +54,7 @@ namespace Monocle.Services
                 CurrentPlayers = Provider.clients.Count,
                 UnturnedVersion = Provider.APP_VERSION,
                 MonocleVersion = MonocleVersion,
+                MapImageEncoded = Convert.ToBase64String(mapImage),
                 PlayersInQueue = Provider.queuePosition,
                 WorldSize = ParseLevelSize(Level.info.size)
             };

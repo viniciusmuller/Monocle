@@ -17,6 +17,7 @@ export class ServerDashboardComponent implements OnInit {
   structures?: Structure[];
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
+  eventLog: string[];
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -27,6 +28,7 @@ export class ServerDashboardComponent implements OnInit {
 
   constructor(private websocketService: WebsocketService) {
     this.chatLog = [];
+    this.eventLog = [];
   }
 
   ngOnInit(): void {
@@ -44,16 +46,31 @@ export class ServerDashboardComponent implements OnInit {
       this.barricades = barricades;
     })
 
-    this.websocketService.onPlayerMessage.subscribe(playerMessage => {
-      this.chatLog = [...this.chatLog, playerMessage];
-    })
-
     this.websocketService.onGetStructures.subscribe(structures => {
       this.structures = structures;
     })
 
     this.websocketService.onGetServerInfo.subscribe(serverDetails => {
       this.serverInfo = serverDetails;
+    })
+
+    this.websocketService.onPlayerMessage.subscribe(playerMessage => {
+      this.chatLog = [...this.chatLog, playerMessage];
+    })
+
+    this.websocketService.onPlayerLeft.subscribe(event => {
+      let message = `[${new Date()}]: ${event.player.name} left`;
+      this.eventLog = [...this.eventLog, message];
+    })
+
+    this.websocketService.onPlayerJoin.subscribe(event => {
+      let message = `[${new Date()}]: ${event.player.name} joined`;
+      this.eventLog = [...this.eventLog, message];
+    })
+
+    this.websocketService.onPlayerDeath.subscribe(event => {
+      let message = `[${new Date()}]: ${event.killer.name} killed ${event.dead.name} - [${event.cause}]`;
+      this.eventLog = [...this.eventLog, message];
     })
 
     // TODO: Find more elegant approach to these

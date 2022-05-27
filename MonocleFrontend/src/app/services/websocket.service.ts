@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
 import { ServerMessage } from 'src/app/types/serverData';
-import { Barricade, Player, PlayerMessage, ServerInfo, Structure } from 'src/app/types/models';
+import { Barricade, Player, PlayerDeath, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -16,6 +16,7 @@ export class WebsocketService {
   private subject: AnonymousSubject<MessageEvent> | null = null;
   private connection: Subject<any> | null = null;
 
+  // Responses
   public onLoginSuccessful: Subject<void>;
   public onGetPlayers: Subject<Player[]>;
   public onGetBarricades: Subject<Barricade[]>;
@@ -24,14 +25,23 @@ export class WebsocketService {
 
   // Events
   public onPlayerMessage: Subject<PlayerMessage>;
+  public onPlayerLeft: Subject<PlayerJoinOrLeave>;
+  public onPlayerJoin: Subject<PlayerJoinOrLeave>;
+  public onPlayerDeath: Subject<PlayerDeath>;
 
   constructor() {
-    this.onLoginSuccessful = new Subject();
+    // Responses
     this.onPlayerMessage = new Subject();
     this.onGetPlayers = new Subject();
     this.onGetBarricades = new Subject();
     this.onGetStructures = new Subject();
     this.onGetServerInfo = new Subject();
+
+    // Events
+    this.onLoginSuccessful = new Subject();
+    this.onPlayerDeath = new Subject();
+    this.onPlayerLeft = new Subject();
+    this.onPlayerJoin = new Subject();
   }
 
   public connect(host: string, port: number) {
@@ -53,24 +63,19 @@ export class WebsocketService {
 
       switch (type) {
         case ServerResponseType.SuccessfulLogin:
-          this.onLoginSuccessful.next();
-          return;
+          return this.onLoginSuccessful.next();
 
         case ServerResponseType.Players:
-          this.onGetPlayers.next(message.data as Player[]);
-          return;
+          return this.onGetPlayers.next(message.data as Player[]);
 
         case ServerResponseType.Barricades:
-          this.onGetBarricades.next(message.data as Barricade[]);
-          return;
+          return this.onGetBarricades.next(message.data as Barricade[]);
 
         case ServerResponseType.Structures:
-          this.onGetStructures.next(message.data as Structure[]);
-          return;
+          return this.onGetStructures.next(message.data as Structure[]);
 
         case ServerResponseType.ServerInfo:
-          this.onGetServerInfo.next(message.data as ServerInfo);
-          return;
+          return this.onGetServerInfo.next(message.data as ServerInfo);
       }
     }
     
@@ -80,8 +85,16 @@ export class WebsocketService {
 
       switch (type) {
         case EventType.PlayerMessage:
-          this.onPlayerMessage.next(message.data as PlayerMessage);
-          break;
+          return this.onPlayerMessage.next(message.data as PlayerMessage);
+
+        case EventType.PlayerDeath:
+          return this.onPlayerDeath.next(message.data as PlayerDeath);
+
+        case EventType.PlayerLeft:
+          return this.onPlayerLeft.next(message.data as PlayerJoinOrLeave);
+
+        case EventType.PlayerJoined:
+          return this.onPlayerJoin.next(message.data as PlayerJoinOrLeave);
       }
     }
   }

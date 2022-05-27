@@ -11,6 +11,7 @@ namespace Monocle.Models
         public string ServerName { get; set; }
         public string MonocleVersion { get; set; }
         public string UnturnedVersion { get; set; }
+        public string MapImageEncoded { get; set; }
         public string MapName { get; set; }
         public int MaxPlayers { get; set; }
         public int CurrentPlayers { get; set; }

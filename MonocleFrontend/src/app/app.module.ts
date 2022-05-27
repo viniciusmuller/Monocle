@@ -14,7 +14,8 @@ import { PlayersDisplayComponent } from './players-display/players-display.compo
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { ServerDetailsComponent } from './server-details/server-details.component';
 import { PlayerComponent } from './player/player.component';
-import { ChatComponent } from './chat/chat.component'; 
+import { ChatComponent } from './chat/chat.component';
+import { EventLogComponent } from './event-log/event-log.component'; 
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { ChatComponent } from './chat/chat.component';
     PlayersDisplayComponent,
     ServerDetailsComponent,
     PlayerComponent,
-    ChatComponent
+    ChatComponent,
+    EventLogComponent
   ],
   imports: [
     BrowserModule,
