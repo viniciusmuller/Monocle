@@ -1,20 +1,21 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, Player } from '../types/models';
+import { Barricade, Player, ServerInfo, Structure } from '../types/models';
 import { LoginPayload } from '../types/serverData';
-import { WebsocketService } from './services/websocket.service';
+import { WebsocketService } from '../services/websocket.service';
 
 @Component({
   selector: 'app-server-dashboard',
   templateUrl: './server-dashboard.component.html',
   styleUrls: ['./server-dashboard.component.scss'],
-  providers: [WebsocketService],
-  changeDetection:  ChangeDetectionStrategy.OnPush
+  providers: [WebsocketService]
 })
 export class ServerDashboardComponent implements OnInit {
   loggedIn: boolean = false;
-  players: Player[];
-  barricades: Barricade[];
+  players?: Player[];
+  barricades?: Barricade[];
+  structures?: Structure[];
+  serverInfo?: ServerInfo;
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -23,11 +24,7 @@ export class ServerDashboardComponent implements OnInit {
     }, 1000);
   }
 
-  constructor(private websocketService: WebsocketService,
-    private cdr: ChangeDetectorRef) {
-    this.players = [];
-    this.barricades = [];
-  }
+  constructor(private websocketService: WebsocketService) { }
 
   ngOnInit(): void {
     // TODO: These should probably be inside the constructor
@@ -39,12 +36,18 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onGetPlayers.subscribe(players => {
       this.players = players;
-      this.cdr.detectChanges();
     })
 
     this.websocketService.onGetBarricades.subscribe(barricades => {
       this.barricades = barricades;
-      this.cdr.detectChanges();
+    })
+
+    this.websocketService.onGetStructures.subscribe(structures => {
+      this.structures = structures;
+    })
+
+    this.websocketService.onGetServerInfo.subscribe(serverDetails => {
+      this.serverInfo = serverDetails;
     })
 
     // TODO: Find more elegant approach to these
@@ -55,10 +58,11 @@ export class ServerDashboardComponent implements OnInit {
     this.getBarricades();
     const barricadeFetchInterval = interval(10000);
     barricadeFetchInterval.subscribe(() => this.getBarricades())
-  }
 
-  trackPlayer(_index: number, player: Player) {
-    return player.id;
+    // TODO: Find more elegant approach to these
+    this.getServerDetails();
+    const serverDetailsFetchInterval = interval(30000);
+    playerFetchInterval.subscribe(() => this.getServerDetails())
   }
 
   getPlayers() {
@@ -70,6 +74,12 @@ export class ServerDashboardComponent implements OnInit {
   getBarricades() {
     if (this.loggedIn) {
       this.websocketService.getBarricades();
+    }
+  }
+
+  getServerDetails() {
+    if (this.loggedIn) {
+      this.websocketService.getServerDetails();
     }
   }
 }

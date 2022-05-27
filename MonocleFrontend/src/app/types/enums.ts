@@ -8,12 +8,12 @@
     export enum RequestType
     {
         Authenticate = "Authenticate",
-        GetPlayers = "GetPlayers",
-        GetPlayerDetails = "GetPlayerDetails",
-        GetStructures = "GetStructures",
-        GetBarricades = "GetBarricades",
-        GetVehicles = "GetVehicles",
-        GetWorldSize = "GetWorldSize",
+        Players = "Players",
+        PlayerDetails = "PlayerDetails",
+        Structures = "Structures",
+        Barricades = "Barricades",
+        Vehicles = "Vehicles",
+        ServerInfo = "ServerInfo",
     }
 
     export enum ServerResponseType
@@ -25,7 +25,7 @@
         Vehicles = "Vehicles",
         Barricades = "Barricades",
         Structures = "Structures",
-        WorldSize = "WorldSize", // TODO: Turn this into ServerDetails request
+        ServerInfo = "ServerInfo",
     }
 
     export enum EventType

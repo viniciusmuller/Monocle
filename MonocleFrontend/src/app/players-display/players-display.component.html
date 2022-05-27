@@ -1,0 +1,16 @@
+<h2>Players</h2>
+<div *ngIf="players; else loading">
+    <ul *ngIf="players.length > 0; else noPlayers">
+        <li *ngFor="let player of players; trackBy: trackPlayer">
+            <app-player [player]="player"></app-player>
+        </li>
+    </ul>
+</div>
+
+<ng-template #loading>
+    <mat-spinner></mat-spinner>
+</ng-template>
+
+<ng-template #noPlayers>
+    <p>There are no players in the server.</p>
+</ng-template>

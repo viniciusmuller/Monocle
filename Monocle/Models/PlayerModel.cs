@@ -19,6 +19,8 @@ namespace Monocle.Models
         public byte Health { get; set; }
         public float Rotation { get; set; }
         public EquipmentModel Equipment { get; set; }
+        public int Reputation { get; set; }
+        public float? Joined { get; set; }
 
         public PlayerModel(SteamPlayer player)
         {
@@ -30,6 +32,8 @@ namespace Monocle.Models
             Health = player.player.life.health;
             Rotation = player.player.transform.rotation.eulerAngles.y;
             Equipment = new EquipmentModel(player);
+            Joined = player.joined;
+            Reputation = player.player.skills.reputation;
         }
 
         public PlayerModel(UnturnedPlayer player)
@@ -42,6 +46,8 @@ namespace Monocle.Models
             Health = player.Health;
             Rotation = player.Rotation;
             Equipment = new EquipmentModel(player);
+            Joined = null; // TODO: Get join from UnturnedPlayer
+            Reputation = player.Reputation;
         }
     }
 

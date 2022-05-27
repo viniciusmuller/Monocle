@@ -8,14 +8,21 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { ServerDashboardComponent } from './server-dashboard/server-dashboard.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { LoginComponentComponent } from './login-component/login-component.component';
+import { PlayersDisplayComponent } from './players-display/players-display.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { ServerDetailsComponent } from './server-details/server-details.component';
+import { PlayerComponent } from './player/player.component'; 
 
 @NgModule({
   declarations: [
     AppComponent,
     ServerDashboardComponent,
-    LoginComponentComponent
+    LoginComponentComponent,
+    PlayersDisplayComponent,
+    ServerDetailsComponent,
+    PlayerComponent
   ],
   imports: [
     BrowserModule,
@@ -24,7 +31,8 @@ import { LoginComponentComponent } from './login-component/login-component.compo
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    ReactiveFormsModule
+    MatProgressSpinnerModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

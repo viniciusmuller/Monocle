@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using static Monocle.Extensions;
 
 namespace Monocle.Services
 {
@@ -160,30 +159,26 @@ namespace Monocle.Services
         {
             switch (type)
             {
-                case RequestType.GetPlayers:
+                case RequestType.Players:
                     var playerModels = UnturnedService.GetPlayers();
                     return new BaseResponse<List<PlayerModel>>(ResponseType.Players, playerModels);
-                case RequestType.GetPlayerDetails:
+                case RequestType.PlayerDetails:
                     var requestData = JsonConvert.DeserializeObject<GetUserInfoRequest>(payload);
                     var player = UnturnedService.GetPlayerDetails(requestData?.UserId);
                     return new BaseResponse<PlayerModel>(ResponseType.PlayerInfo, player);
-                case RequestType.GetStructures:
+                case RequestType.Structures:
                     // Structs are floors, walls, roofs, stairs, etc
                     var structures = UnturnedService.GetStructures();
                     return new BaseResponse<List<StructureModel>>(ResponseType.Structures, structures);
-                case RequestType.GetBarricades:
+                case RequestType.Barricades:
                     // Barricades are everything that can be stick into cars: lockers, wardrobes, metal plates, etc
                     var barricades = UnturnedService.GetBarricades();
                     return new BaseResponse<List<BarricadeModel>>(ResponseType.Barricades, barricades);
-                case RequestType.GetVehicles:
+                case RequestType.Vehicles:
                     var vehicles = UnturnedService.GetVehicles();
                     return new BaseResponse<List<VehicleModel>>(ResponseType.Vehicles, vehicles);
                 case RequestType.ServerInfo:
-                    // TODO: Get this data and move this to UnturnedService
-                    var serverInfo = new ServerInfoModel
-                    {
-                        WorldSize = 2048,
-                    };
+                    var serverInfo = UnturnedService.GetServerInfo();
                     return new BaseResponse<ServerInfoModel>(ResponseType.ServerInfo, serverInfo);
                 default:
                     throw new ArgumentException("We should never get an invalid request type here");

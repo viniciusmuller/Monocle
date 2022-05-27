@@ -1,0 +1,10 @@
+<h2>Info</h2>
+<div *ngIf="serverInfo; else loading">
+    <p>Connected to Monocle v{{serverInfo.monocleVersion}}, server running Unturned v{{serverInfo.unturnedVersion}}</p>
+    <p>Map {{serverInfo.mapName}}, {{serverInfo.worldSize}}x{{serverInfo.worldSize}}</p>
+    <p>{{ totalPlayers }} / {{serverInfo.maxPlayers }} players ({{serverInfo.playersInQueue}} in queue)</p>
+</div>
+
+<ng-template #loading>
+    <mat-spinner></mat-spinner>
+</ng-template>

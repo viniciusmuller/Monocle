@@ -23,11 +23,11 @@ namespace Monocle.Api
     internal enum RequestType
     {
         Authenticate,
-        GetPlayers,
-        GetPlayerDetails,
-        GetStructures,
-        GetBarricades,
-        GetVehicles,
+        Players,
+        PlayerDetails,
+        Structures,
+        Barricades,
+        Vehicles,
         ServerInfo,
     }
 

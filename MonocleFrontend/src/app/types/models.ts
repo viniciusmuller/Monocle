@@ -31,6 +31,7 @@ export interface Player {
     position: Position;
     health: number;
     rotation: number;
+    reputation: number;
     equipment: Equipment;
 }
 
@@ -50,4 +51,16 @@ export interface Vehicle {
     name: string;
     position: Position;
     id: number;
+}
+
+export interface ServerInfo {
+    serverName: string;
+    monocleVersion: string;
+    unturnedVersion: string;
+    mapName: string;
+    maxPlayers: number;
+    currentPlayers: number;
+    queueSize: number;
+    playersInQueue: number;
+    worldSize: number;
 }

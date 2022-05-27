@@ -6,6 +6,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace Monocle.Services
 {
     internal class UnturnedService
     {
+        private readonly static string MonocleVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
         public List<PlayerModel> GetPlayers()
         {
 
@@ -36,6 +39,22 @@ namespace Monocle.Services
 
             var playerInventory = FetchInventoryItems(client.player.inventory.items);
             return new PlayerDetailsModel(client, playerInventory);
+        }
+
+        public ServerInfoModel GetServerInfo()
+        {
+            return new ServerInfoModel
+            {
+                MapName = Provider.map,
+                MaxPlayers = Provider.maxPlayers,
+                ServerName = Provider.serverName,
+                QueueSize = Provider.queueSize,
+                CurrentPlayers = Provider.clients.Count,
+                UnturnedVersion = Provider.APP_VERSION,
+                MonocleVersion = MonocleVersion,
+                PlayersInQueue = Provider.queuePosition,
+                WorldSize = ParseLevelSize(Level.info.size)
+            };
         }
 
         public List<BarricadeModel> GetBarricades()
@@ -86,5 +105,17 @@ namespace Monocle.Services
             return playerInventory;
         }
 
+        private int ParseLevelSize(ELevelSize levelSize)
+        {
+            return levelSize switch
+            {
+                ELevelSize.TINY => 512,
+                ELevelSize.SMALL => 1024,
+                ELevelSize.MEDIUM => 2048,
+                ELevelSize.LARGE => 4096,
+                ELevelSize.INSANE => 8192,
+                _ => 0,
+            };
+        }
     }
 }

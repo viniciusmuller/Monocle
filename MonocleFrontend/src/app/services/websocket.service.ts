@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
 import { ServerMessage } from 'src/app/types/serverData';
-import { Barricade, Player } from 'src/app/types/models';
+import { Barricade, Player, ServerInfo, Structure } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -19,6 +19,8 @@ export class WebsocketService {
   public onLoginSuccessful: Subject<void>;
   public onGetPlayers: Subject<Player[]>;
   public onGetBarricades: Subject<Barricade[]>;
+  public onGetStructures: Subject<Structure[]>;
+  public onGetServerInfo: Subject<ServerInfo>;
 
   // Events
   public onPlayerMessage: Subject<any>;
@@ -28,6 +30,8 @@ export class WebsocketService {
     this.onPlayerMessage = new Subject();
     this.onGetPlayers = new Subject();
     this.onGetBarricades = new Subject();
+    this.onGetStructures = new Subject();
+    this.onGetServerInfo = new Subject();
   }
 
   public connect(host: string, port: number) {
@@ -59,6 +63,14 @@ export class WebsocketService {
         case ServerResponseType.Barricades:
           this.onGetBarricades.next(message.data as Barricade[]);
           return;
+
+        case ServerResponseType.Structures:
+          this.onGetStructures.next(message.data as Structure[]);
+          return;
+
+        case ServerResponseType.ServerInfo:
+          this.onGetServerInfo.next(message.data as ServerInfo);
+          return;
       }
     }
     
@@ -77,11 +89,19 @@ export class WebsocketService {
   }
 
   public getPlayers() {
-    this.sendRequestType(RequestType.GetPlayers, null); 
+    this.sendRequestType(RequestType.Players, null); 
   }
 
   public getBarricades() {
-    this.sendRequestType(RequestType.GetBarricades, null); 
+    this.sendRequestType(RequestType.Barricades, null); 
+  }
+
+  public getStructures() {
+    this.sendRequestType(RequestType.Structures, null); 
+  }
+
+  public getServerDetails() {
+    this.sendRequestType(RequestType.ServerInfo, null); 
   }
 
   private sendRequestType<T>(type: RequestType, data: T) {
