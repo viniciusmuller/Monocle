@@ -13,7 +13,8 @@ import { LoginComponentComponent } from './login-component/login-component.compo
 import { PlayersDisplayComponent } from './players-display/players-display.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { ServerDetailsComponent } from './server-details/server-details.component';
-import { PlayerComponent } from './player/player.component'; 
+import { PlayerComponent } from './player/player.component';
+import { ChatComponent } from './chat/chat.component'; 
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { PlayerComponent } from './player/player.component';
     LoginComponentComponent,
     PlayersDisplayComponent,
     ServerDetailsComponent,
-    PlayerComponent
+    PlayerComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,

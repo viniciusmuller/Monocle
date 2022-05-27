@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, Player, ServerInfo, Structure } from '../types/models';
+import { Barricade, Player, PlayerMessage, ServerInfo, Structure } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
 
@@ -16,6 +16,7 @@ export class ServerDashboardComponent implements OnInit {
   barricades?: Barricade[];
   structures?: Structure[];
   serverInfo?: ServerInfo;
+  chatLog: PlayerMessage[];
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -24,13 +25,14 @@ export class ServerDashboardComponent implements OnInit {
     }, 1000);
   }
 
-  constructor(private websocketService: WebsocketService) { }
+  constructor(private websocketService: WebsocketService) {
+    this.chatLog = [];
+  }
 
   ngOnInit(): void {
     // TODO: These should probably be inside the constructor
 
     this.websocketService.onLoginSuccessful.subscribe(_ => {
-      console.log('successfully logged in!');
       this.loggedIn = true;
     })
 
@@ -40,6 +42,10 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onGetBarricades.subscribe(barricades => {
       this.barricades = barricades;
+    })
+
+    this.websocketService.onPlayerMessage.subscribe(playerMessage => {
+      this.chatLog = [...this.chatLog, playerMessage];
     })
 
     this.websocketService.onGetStructures.subscribe(structures => {

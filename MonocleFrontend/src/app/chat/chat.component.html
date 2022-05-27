@@ -1,0 +1,6 @@
+<h2>Chat</h2>
+<div>
+    <p *ngFor="let message of messages">
+        [{{message.chatMode}}] {{message.author.name}}: {{message.content}}
+    </p>
+</div>

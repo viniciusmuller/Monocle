@@ -1,3 +1,5 @@
+import { ChatMode } from "./enums";
+
 export interface Position {
     x: number;
     y: number;
@@ -63,4 +65,11 @@ export interface ServerInfo {
     queueSize: number;
     playersInQueue: number;
     worldSize: number;
+}
+
+export interface PlayerMessage {
+    author: Player;
+    content: string;
+    chatMode: ChatMode;
+    colorHex: string;
 }

@@ -56,4 +56,13 @@ namespace Monocle.Api
         Observer,
         Administrator
     }
+
+    enum ChatMode
+    {
+        Global,
+        Local,
+        Group,
+        Say,
+        Welcome,
+    }
 }

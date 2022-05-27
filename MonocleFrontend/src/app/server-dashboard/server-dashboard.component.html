@@ -1,8 +1,9 @@
 <div *ngIf="loggedIn; else notLoggedIn">
     <h1>Hello!</h1>
-    <div>
+    <div id="items">
         <app-server-details [serverInfo]="serverInfo" [totalPlayers]="players?.length ?? 0"></app-server-details>
         <app-players-display [players]="players"></app-players-display>
+        <app-chat [messages]="chatLog"></app-chat>
     </div>
 </div>
 

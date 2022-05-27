@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
 import { ServerMessage } from 'src/app/types/serverData';
-import { Barricade, Player, ServerInfo, Structure } from 'src/app/types/models';
+import { Barricade, Player, PlayerMessage, ServerInfo, Structure } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -23,7 +23,7 @@ export class WebsocketService {
   public onGetServerInfo: Subject<ServerInfo>;
 
   // Events
-  public onPlayerMessage: Subject<any>;
+  public onPlayerMessage: Subject<PlayerMessage>;
 
   constructor() {
     this.onLoginSuccessful = new Subject();
@@ -80,9 +80,7 @@ export class WebsocketService {
 
       switch (type) {
         case EventType.PlayerMessage:
-          this.onPlayerMessage.next({
-
-          });
+          this.onPlayerMessage.next(message.data as PlayerMessage);
           break;
       }
     }

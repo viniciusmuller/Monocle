@@ -63,7 +63,8 @@ namespace Monocle.Services
             UnturnedPlayerEvents.OnPlayerDeath += (deadPlayer, cause, limb, murdererId) =>
             {
                 var @event = EventHandlers.PlayerDeath(deadPlayer, murdererId, cause);
-                BroadcastEvent(EventType.PlayerDeath, @event);
+                var message = CreateEvent(EventType.PlayerDeath, @event);
+                BroadcastEvent(message);
             };
 
             UnturnedPlayerEvents.OnPlayerChatted += (UnturnedPlayer player, ref UnityEngine.Color color, string message, EChatMode chatMode, ref bool _cancel) =>
@@ -71,31 +72,36 @@ namespace Monocle.Services
                 // TODO: If message starts with /, then it's a command, but can we check if the command failed or succeeded?
 
                 var @event = EventHandlers.PlayerMessage(player, color, chatMode, message);
-                BroadcastEvent(EventType.PlayerMessage, @event);
+                var serverMessage = CreateEvent(EventType.PlayerMessage, @event);
+                BroadcastEvent(serverMessage);
             };
 
             U.Events.OnPlayerConnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                BroadcastEvent(EventType.PlayerJoined, @event);
+                var message = CreateEvent(EventType.PlayerJoined, @event);
+                BroadcastEvent(message);
             };
 
             U.Events.OnPlayerDisconnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                BroadcastEvent(EventType.PlayerLeft, @event);
+                var message = CreateEvent(EventType.PlayerLeft, @event);
+                BroadcastEvent(message);
             };
         }
 
-        void BroadcastEvent(EventType type, Event @event)
+        void BroadcastEvent(ServerMessage<EventType, Event> message)
         {
-            var baseEvent = new BaseEvent(type, @event);
             foreach (var (socket, _) in LoggedInUsers.Values)
             {
-                var payload = JsonConvert.SerializeObject(baseEvent);
+                var payload = JsonConvert.SerializeObject(message, SerializationSettings);
                 socket.Send(payload);
             }
         }
+
+        private ServerMessage<EventType, Event> CreateEvent(EventType type, Event data) =>
+            new(MessageKind.Event, type, data);
 
         void HandleOpen(IWebSocketConnection socket)
         {
@@ -121,8 +127,8 @@ namespace Monocle.Services
             var type = GetRequestType(payload);
             if (type == null)
             {
-                var error = new ErrorModel(ErrorType.InvalidRequestType, "The request type was not provided or invalid");
-                SendMessage(socket, error);
+                var message = new ServerMessage<ErrorType, string>(MessageKind.Error, ErrorType.InvalidRequestType, "The request type was not provided or invalid");
+                SendMessage(socket, message);
             }
             else if (isAuthenticated)
             {
@@ -132,7 +138,8 @@ namespace Monocle.Services
                     SendMessage(socket, response);
                 } catch (ApiException ex)
                 {
-                    SendMessage(socket, ex.ErrorModel);
+                    var message = new ServerMessage<ErrorType, ErrorModel>(MessageKind.Error, ErrorType.InvalidRequestData, ex.ErrorModel);
+                    SendMessage(socket, message);
                 }
             }
             else
@@ -142,7 +149,7 @@ namespace Monocle.Services
                 if (user != null)
                 {
                     // TODO: Refactor how responses are handled as data in the code
-                    var response = new BaseResponse<string>(ResponseType.SuccessfulLogin, "Authentication succeeded");
+                    var response = new ServerMessage<ResponseType, string>(MessageKind.Response, ResponseType.SuccessfulLogin, "Authentication succeeded");
                     SendMessage(socket, response);
                     Logger.LogWarning($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
                     LoggedInUsers[socket.ConnectionInfo.Id] = (socket, user);
@@ -155,35 +162,38 @@ namespace Monocle.Services
             }
         }
 
-        Response ServeRequest(RequestType? type, string payload)
+        ServerMessage<ResponseType, dynamic> ServeRequest(RequestType? type, string payload)
         {
             switch (type)
             {
                 case RequestType.Players:
                     var playerModels = UnturnedService.GetPlayers();
-                    return new BaseResponse<List<PlayerModel>>(ResponseType.Players, playerModels);
+                    return BuildResponse(ResponseType.Players, playerModels);
                 case RequestType.PlayerDetails:
                     var requestData = JsonConvert.DeserializeObject<GetUserInfoRequest>(payload);
                     var player = UnturnedService.GetPlayerDetails(requestData?.UserId);
-                    return new BaseResponse<PlayerModel>(ResponseType.PlayerInfo, player);
+                    return BuildResponse(ResponseType.PlayerInfo, player);
                 case RequestType.Structures:
                     // Structs are floors, walls, roofs, stairs, etc
                     var structures = UnturnedService.GetStructures();
-                    return new BaseResponse<List<StructureModel>>(ResponseType.Structures, structures);
+                    return BuildResponse(ResponseType.Structures, structures);
                 case RequestType.Barricades:
                     // Barricades are everything that can be stick into cars: lockers, wardrobes, metal plates, etc
                     var barricades = UnturnedService.GetBarricades();
-                    return new BaseResponse<List<BarricadeModel>>(ResponseType.Barricades, barricades);
+                    return BuildResponse(ResponseType.Barricades, barricades);
                 case RequestType.Vehicles:
                     var vehicles = UnturnedService.GetVehicles();
-                    return new BaseResponse<List<VehicleModel>>(ResponseType.Vehicles, vehicles);
+                    return BuildResponse(ResponseType.Vehicles, vehicles);
                 case RequestType.ServerInfo:
                     var serverInfo = UnturnedService.GetServerInfo();
-                    return new BaseResponse<ServerInfoModel>(ResponseType.ServerInfo, serverInfo);
+                    return BuildResponse(ResponseType.ServerInfo, serverInfo);
                 default:
                     throw new ArgumentException("We should never get an invalid request type here");
             }
         }
+        
+        private ServerMessage<ResponseType, dynamic> BuildResponse<T>(ResponseType type, T data) => 
+            new(MessageKind.Response, type, data!);
 
         AuthorizedUser? Authenticate(LoginRequest? payload)
         {
@@ -205,7 +215,7 @@ namespace Monocle.Services
             return baseRequest?.Type;
         }
 
-        void SendMessage(IWebSocketConnection socket, Response response)
+        void SendMessage<T, D>(IWebSocketConnection socket, ServerMessage<T, D> response)
         {
             var serialized = JsonConvert.SerializeObject(response, SerializationSettings);
             socket.Send(serialized);

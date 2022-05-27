@@ -14,23 +14,6 @@ namespace Monocle.Api
 {
     abstract class Event { }
 
-    class BaseEvent
-    {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public EventType Type;
-
-        [JsonConverter(typeof(StringEnumConverter))]
-        public MessageKind Kind = MessageKind.Event;
-
-        public Event Data;
-
-        public BaseEvent(EventType type, Event data)
-        {
-            Type = type;
-            Data = data;
-        }
-    }
-
     class PlayerDeathEvent : Event
     {
         public PlayerModel? Killer;
@@ -48,7 +31,7 @@ namespace Monocle.Api
     class PlayerMessageEvent : Event
     {
         public PlayerModel Author;
-        public string Message;
+        public string Content;
         public string ColorHex;
 
         [JsonConverter(typeof(StringEnumConverter))]
@@ -57,7 +40,7 @@ namespace Monocle.Api
         public PlayerMessageEvent(PlayerModel player, Color color, EChatMode chatMode, string message)
         {
             Author = player;
-            Message = message;
+            Content = message;
             ChatMode = chatMode.ToMonocleChatMode();
             ColorHex = ColorUtility.ToHtmlStringRGB(color);
         }
@@ -73,14 +56,5 @@ namespace Monocle.Api
             Player = player;
             Time = DateTimeOffset.UtcNow; // TODO: Fix timezone
         }
-    }
-
-    enum ChatMode
-    {
-        Global,
-        Local,
-        Group,
-        Say,
-        Welcome,
     }
 }

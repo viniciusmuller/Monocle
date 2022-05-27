@@ -4,3 +4,9 @@
     justify-content: center;
     flex-direction: column;
 }
+
+#items {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
