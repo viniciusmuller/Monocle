@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MonocleEvent } from '../types/models';
 
 @Component({
   selector: 'app-event-log',
@@ -6,7 +7,7 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./event-log.component.scss']
 })
 export class EventLogComponent implements OnInit {
-  @Input() messages!: string[];
+  @Input() events!: MonocleEvent[];
 
   constructor() { }
   ngOnInit(): void { }

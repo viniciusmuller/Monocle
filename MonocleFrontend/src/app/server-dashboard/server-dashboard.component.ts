@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, Player, PlayerMessage, ServerInfo, Structure } from '../types/models';
+import { Barricade, MonocleEvent, Player, PlayerMessage, ServerInfo, Structure } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
 
@@ -17,7 +17,7 @@ export class ServerDashboardComponent implements OnInit {
   structures?: Structure[];
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
-  eventLog: string[];
+  eventLog: MonocleEvent[];
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -58,19 +58,22 @@ export class ServerDashboardComponent implements OnInit {
       this.chatLog = [...this.chatLog, playerMessage];
     })
 
-    this.websocketService.onPlayerLeft.subscribe(event => {
-      let message = `[${new Date()}]: ${event.player.name} left`;
-      this.eventLog = [...this.eventLog, message];
+    this.websocketService.onPlayerLeft.subscribe(leftEvent => {
+      let message = `${leftEvent.player.name} left`;
+      let event = this.buildEvent(message);
+      this.eventLog = [...this.eventLog, event];
     })
 
-    this.websocketService.onPlayerJoin.subscribe(event => {
-      let message = `[${new Date()}]: ${event.player.name} joined`;
-      this.eventLog = [...this.eventLog, message];
+    this.websocketService.onPlayerJoin.subscribe(joinEvent => {
+      let message = `${joinEvent.player.name} joined`;
+      let event = this.buildEvent(message);
+      this.eventLog = [...this.eventLog, event];
     })
 
-    this.websocketService.onPlayerDeath.subscribe(event => {
-      let message = `[${new Date()}]: ${event.killer.name} killed ${event.dead.name} - [${event.cause}]`;
-      this.eventLog = [...this.eventLog, message];
+    this.websocketService.onPlayerDeath.subscribe(deathEvent => {
+      let message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
+      let event = this.buildEvent(message);
+      this.eventLog = [...this.eventLog, event];
     })
 
     // TODO: Find more elegant approach to these
@@ -79,18 +82,35 @@ export class ServerDashboardComponent implements OnInit {
     playerFetchInterval.subscribe(() => this.getPlayers())
 
     this.getBarricades();
-    const barricadeFetchInterval = interval(10000);
-    barricadeFetchInterval.subscribe(() => this.getBarricades())
+    const barricadesFetchInterval = interval(10000);
+    barricadesFetchInterval.subscribe(() => this.getBarricades())
+
+    this.getStructures();
+    const structuresFetchInterval = interval(10000);
+    structuresFetchInterval.subscribe(() => this.getStructures())
 
     // TODO: Find more elegant approach to these
     this.getServerDetails();
-    const serverDetailsFetchInterval = interval(30000);
-    playerFetchInterval.subscribe(() => this.getServerDetails())
+    const serverDetailsFetchInterval = interval(3000);
+    serverDetailsFetchInterval.subscribe(() => this.getServerDetails())
+  }
+
+  buildEvent(message: string): MonocleEvent {
+    return {
+        time: new Date(),
+        message
+    }
   }
 
   getPlayers() {
     if (this.loggedIn) {
       this.websocketService.getPlayers();
+    }
+  }
+
+  getStructures() {
+    if (this.loggedIn) {
+      this.websocketService.getStructures();
     }
   }
 

@@ -2,6 +2,10 @@
 <div *ngIf="serverInfo; else loading">
     <p>Connected to Monocle v{{serverInfo.monocleVersion}}, server running Unturned v{{serverInfo.unturnedVersion}}</p>
     <p>Map {{serverInfo.mapName}}, {{serverInfo.worldSize}}x{{serverInfo.worldSize}}</p>
+    <div id="loading-spinner">
+        <!-- TODO: Add background color to spinner -->
+        <mat-progress-spinner type="determinate" value="{{totalPlayers / serverInfo.maxPlayers * 100}}"></mat-progress-spinner>
+    </div>
     <p>{{ totalPlayers }} / {{serverInfo.maxPlayers }} players ({{serverInfo.playersInQueue}} in queue)</p>
 </div>
 

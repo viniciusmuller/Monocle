@@ -21,6 +21,7 @@ namespace Monocle.Models
         public EquipmentModel Equipment { get; set; }
         public int Reputation { get; set; }
         public float? Joined { get; set; }
+        public List<ItemModel> Items { get; set; }
 
         public PlayerModel(SteamPlayer player)
         {
@@ -34,6 +35,7 @@ namespace Monocle.Models
             Equipment = new EquipmentModel(player);
             Joined = player.joined;
             Reputation = player.player.skills.reputation;
+            Items = GetItemsFromInventory(player.player.inventory);
         }
 
         public PlayerModel(UnturnedPlayer player)
@@ -48,16 +50,21 @@ namespace Monocle.Models
             Equipment = new EquipmentModel(player);
             Joined = null; // TODO: Get join from UnturnedPlayer
             Reputation = player.Reputation;
+            Items = GetItemsFromInventory(player.Inventory);
         }
-    }
-
-    internal class PlayerDetailsModel : PlayerModel
-    {
-        public List<ItemModel> Items { get; set; }
-
-        public PlayerDetailsModel(SteamPlayer player, List<ItemModel> items) : base(player)
+        
+        private List<ItemModel> GetItemsFromInventory(PlayerInventory inventory)
         {
-            Items = items;
+            var items = new List<ItemModel>();
+            var pages = inventory.items.Take(inventory.items.Count() - 2); // Ignore storage and ground pages
+
+            foreach (var page in pages)
+            {
+                var pageItems = page.items.Select(i => new ItemModel(i, i.GetName()));
+                items.AddRange(pageItems);
+            }
+
+            return items;
         }
     }
 }

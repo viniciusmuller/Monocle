@@ -22,11 +22,11 @@ namespace Monocle.Models
             Id = item.item.id;
         }
 
-        public ItemModel(ItemAsset item, byte durability)
+        public ItemModel(ItemAsset item, byte? durability)
         {
             Amount = item.amount;
             Name = item.FriendlyName;
-            Durability = durability;
+            Durability = durability ?? 100;
             Id = item.id;
         }
     }

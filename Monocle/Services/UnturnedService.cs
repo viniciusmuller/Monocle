@@ -24,22 +24,22 @@ namespace Monocle.Services
             return playerModels;
         }
         
-        public PlayerDetailsModel GetPlayerDetails(ulong? userId)
-        {
-            if (userId == null)
-            {
-                throw new ApiException(ErrorType.InvalidRequestData, $"userId was not provided");
-            }
+        //public PlayerDetailsModel GetPlayerDetails(ulong? userId)
+        //{
+        //    if (userId == null)
+        //    {
+        //        throw new ApiException(ErrorType.InvalidRequestData, $"userId was not provided");
+        //    }
 
-            var result = Utils.TryGetPlayer(userId.Value, out var client);
-            if (!result)
-            {
-                throw new ApiException(ErrorType.UserNotFound, $"The user of ID {userId} was not found in the server.");
-            }
+        //    var result = Utils.TryGetPlayer(userId.Value, out var client);
+        //    if (!result)
+        //    {
+        //        throw new ApiException(ErrorType.UserNotFound, $"The user of ID {userId} was not found in the server.");
+        //    }
 
-            var playerInventory = FetchInventoryItems(client.player.inventory.items);
-            return new PlayerDetailsModel(client, playerInventory);
-        }
+        //    var playerInventory = FetchInventoryItems(client.player.inventory.items);
+        //    return new PlayerDetailsModel(client, playerInventory);
+        //}
 
         public ServerInfoModel GetServerInfo()
         {

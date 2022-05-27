@@ -1,0 +1,11 @@
+<mat-accordion>
+    <app-item *ngIf="equipment.hat" [description]="'Hat'" [item]="equipment.hat"></app-item>
+    <app-item *ngIf="equipment.vest" [description]="'Vest'" [item]="equipment.vest"></app-item>
+    <app-item *ngIf="equipment.backpack" [description]="'Backpack'" [item]="equipment.backpack"></app-item>
+    <app-item *ngIf="equipment.pants" [description]="'Pants'" [item]="equipment.pants"></app-item>
+    <app-item *ngIf="equipment.shirt" [description]="'Shirt'" [item]="equipment.shirt"></app-item>
+    <app-item *ngIf="equipment.mask" [description]="'Mask'" [item]="equipment.mask"></app-item>
+    <app-item *ngIf="equipment.glasses" [description]="'Glasses'" [item]="equipment.glasses"></app-item>
+    <app-item *ngIf="equipment.primary" [description]="'Primary'" [item]="equipment.primary"></app-item>
+    <app-item *ngIf="equipment.secondary" [description]="'Secondary'" [item]="equipment.secondary"></app-item>
+</mat-accordion>

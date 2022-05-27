@@ -36,6 +36,7 @@ export interface Player {
     reputation: number;
     equipment: Equipment;
     joined?: number;
+    items: Item[];
 }
 
 interface Building {
@@ -85,4 +86,9 @@ export interface PlayerDeath {
     dead: Player;
     killer: Player;
     cause: string;
+}
+
+export interface MonocleEvent {
+    time: Date;
+    message: string;
 }

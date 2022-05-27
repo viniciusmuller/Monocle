@@ -11,4 +11,8 @@ export class PlayerComponent implements OnInit {
 
   constructor() { }
   ngOnInit(): void { }
+
+  round(number: number): number {
+    return Math.round(number)
+  }
 }

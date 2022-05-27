@@ -19,7 +19,6 @@ export enum RequestType
 export enum ServerResponseType
 {
     Players = "Players",
-    PlayerInfo = "PlayerInfo",
     CurrentBuildings = "CurrentBuildings",
     SuccessfulLogin = "SuccessfulLogin",
     Vehicles = "Vehicles",

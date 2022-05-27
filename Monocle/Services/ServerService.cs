@@ -138,7 +138,7 @@ namespace Monocle.Services
                     SendMessage(socket, response);
                 } catch (ApiException ex)
                 {
-                    var message = new ServerMessage<ErrorType, ErrorModel>(MessageKind.Error, ErrorType.InvalidRequestData, ex.ErrorModel);
+                    var message = new ServerMessage<ErrorType, string>(MessageKind.Error, ex.ErrorModel.Type, ex.ErrorModel.Message);
                     SendMessage(socket, message);
                 }
             }
@@ -151,7 +151,7 @@ namespace Monocle.Services
                     // TODO: Refactor how responses are handled as data in the code
                     var response = new ServerMessage<ResponseType, string>(MessageKind.Response, ResponseType.SuccessfulLogin, "Authentication succeeded");
                     SendMessage(socket, response);
-                    Logger.LogWarning($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
+                    Logger.Log($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
                     LoggedInUsers[socket.ConnectionInfo.Id] = (socket, user);
                 }
                 else
@@ -169,10 +169,6 @@ namespace Monocle.Services
                 case RequestType.Players:
                     var playerModels = UnturnedService.GetPlayers();
                     return BuildResponse(ResponseType.Players, playerModels);
-                case RequestType.PlayerDetails:
-                    var requestData = JsonConvert.DeserializeObject<GetUserInfoRequest>(payload);
-                    var player = UnturnedService.GetPlayerDetails(requestData?.UserId);
-                    return BuildResponse(ResponseType.PlayerInfo, player);
                 case RequestType.Structures:
                     // Structs are floors, walls, roofs, stairs, etc
                     var structures = UnturnedService.GetStructures();

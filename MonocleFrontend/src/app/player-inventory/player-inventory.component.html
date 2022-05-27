@@ -1,0 +1,5 @@
+<mat-accordion *ngIf="items.length > 0">
+    <ng-container *ngFor="let item of items; trackBy: trackItem">
+        <app-item [item]="item"></app-item>
+    </ng-container>
+</mat-accordion>

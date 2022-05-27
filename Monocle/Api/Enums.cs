@@ -34,7 +34,6 @@ namespace Monocle.Api
     internal enum ResponseType
     {
         Players,
-        PlayerInfo,
         CurrentBuildings,
         SuccessfulLogin,
         Vehicles,

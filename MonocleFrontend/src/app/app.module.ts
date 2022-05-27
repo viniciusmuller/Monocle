@@ -16,6 +16,10 @@ import { ServerDetailsComponent } from './server-details/server-details.componen
 import { PlayerComponent } from './player/player.component';
 import { ChatComponent } from './chat/chat.component';
 import { EventLogComponent } from './event-log/event-log.component'; 
+import {MatExpansionModule} from '@angular/material/expansion';
+import { PlayerInventoryComponent } from './player-inventory/player-inventory.component';
+import { ItemComponent } from './item/item.component';
+import { PlayerEquipmentComponent } from './player-equipment/player-equipment.component'; 
 
 @NgModule({
   declarations: [
@@ -26,7 +30,10 @@ import { EventLogComponent } from './event-log/event-log.component';
     ServerDetailsComponent,
     PlayerComponent,
     ChatComponent,
-    EventLogComponent
+    EventLogComponent,
+    PlayerInventoryComponent,
+    ItemComponent,
+    PlayerEquipmentComponent
   ],
   imports: [
     BrowserModule,
@@ -37,6 +44,7 @@ import { EventLogComponent } from './event-log/event-log.component';
     MatButtonModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
+    MatExpansionModule
   ],
   providers: [],
   bootstrap: [AppComponent]

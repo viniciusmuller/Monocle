@@ -1,0 +1,21 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            {{item.name}}
+        </mat-panel-title>
+        <mat-panel-description *ngIf="description; else amountDescription">
+            {{description}}
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <p>Name: {{item.name}}</p>
+    <p>Amount: {{item.amount}}</p>
+    <p>Durability: {{item.durability}}%</p>
+    <p>Id: {{item.id}}</p>
+</mat-expansion-panel>
+
+<ng-template #amountDescription>
+    <mat-panel-description *ngIf="item.amount > 1">
+        X{{item.amount}}
+    </mat-panel-description>
+</ng-template>
