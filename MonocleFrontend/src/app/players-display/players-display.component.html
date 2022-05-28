@@ -1,11 +1,14 @@
-<h2>Players</h2>
-<div *ngIf="players; else loading">
-    <mat-accordion *ngIf="players.length > 0; else noPlayers">
-        <ng-container *ngFor="let player of players; trackBy: trackPlayer">
-            <app-player [player]="player"></app-player>
+<mat-card>
+    <mat-card-title>Players</mat-card-title>
+
+    <ng-container *ngIf="players; else loading">
+        <ng-container *ngIf="players.length > 0; else noPlayers">
+            <mat-action-list *ngFor="let player of players; trackBy: trackPlayer">
+                <button mat-list-item (click)="playerSelected(player)">{{player.name}}</button>
+            </mat-action-list>
         </ng-container>
-    </mat-accordion>
-</div>
+    </ng-container>
+</mat-card>
 
 <ng-template #loading>
     <mat-spinner></mat-spinner>

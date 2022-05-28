@@ -1,5 +1,7 @@
 import { ChatMode } from "./enums";
 
+export type PlayerId = number;
+
 export interface Position {
     x: number;
     y: number;
@@ -26,7 +28,7 @@ export interface Equipment {
 }
 
 export interface Player {
-    id: number;
+    id: PlayerId;
     name: string;
     isAdmin: boolean;
     ping: number;
@@ -75,6 +77,7 @@ export interface PlayerMessage {
     content: string;
     chatMode: ChatMode;
     colorHex: string;
+    time: Date;
 }
 
 export interface PlayerJoinOrLeave {
@@ -83,6 +86,7 @@ export interface PlayerJoinOrLeave {
 }
 
 export interface PlayerDeath {
+    time: Date;
     dead: Player;
     killer: Player;
     cause: string;

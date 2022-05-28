@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, MonocleEvent, Player, PlayerMessage, ServerInfo, Structure } from '../types/models';
+import { Barricade, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
 
@@ -18,6 +18,7 @@ export class ServerDashboardComponent implements OnInit {
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
+  selectedPlayerId?: PlayerId;
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port);
@@ -36,6 +37,7 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onLoginSuccessful.subscribe(_ => {
       this.loggedIn = true;
+      this.bindRequests();
     })
 
     this.websocketService.onGetPlayers.subscribe(players => {
@@ -60,22 +62,24 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onPlayerLeft.subscribe(leftEvent => {
       let message = `${leftEvent.player.name} left`;
-      let event = this.buildEvent(message);
+      let event = this.buildEvent(leftEvent.time, message);
       this.eventLog = [...this.eventLog, event];
     })
 
     this.websocketService.onPlayerJoin.subscribe(joinEvent => {
       let message = `${joinEvent.player.name} joined`;
-      let event = this.buildEvent(message);
+      let event = this.buildEvent(joinEvent.time, message);
       this.eventLog = [...this.eventLog, event];
     })
 
     this.websocketService.onPlayerDeath.subscribe(deathEvent => {
       let message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
-      let event = this.buildEvent(message);
+      let event = this.buildEvent(deathEvent.time, message);
       this.eventLog = [...this.eventLog, event];
     })
+  }
 
+  bindRequests() {
     // TODO: Find more elegant approach to these
     this.getPlayers();
     const playerFetchInterval = interval(1000);
@@ -95,34 +99,31 @@ export class ServerDashboardComponent implements OnInit {
     serverDetailsFetchInterval.subscribe(() => this.getServerDetails())
   }
 
-  buildEvent(message: string): MonocleEvent {
-    return {
-        time: new Date(),
-        message
-    }
+  buildEvent(time: Date, message: string): MonocleEvent {
+    return { time, message }
+  }
+
+  playerSelected(id: PlayerId) {
+    this.selectedPlayerId = id;
+  }
+
+  getSelectedPlayer(): Player | undefined {
+    return this.players?.find(p => p.id == this.selectedPlayerId);
   }
 
   getPlayers() {
-    if (this.loggedIn) {
-      this.websocketService.getPlayers();
-    }
+    this.websocketService.getPlayers();
   }
 
   getStructures() {
-    if (this.loggedIn) {
-      this.websocketService.getStructures();
-    }
+    this.websocketService.getStructures();
   }
 
   getBarricades() {
-    if (this.loggedIn) {
-      this.websocketService.getBarricades();
-    }
+    this.websocketService.getBarricades();
   }
 
   getServerDetails() {
-    if (this.loggedIn) {
-      this.websocketService.getServerDetails();
-    }
+    this.websocketService.getServerDetails();
   }
 }

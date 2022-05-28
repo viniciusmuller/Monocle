@@ -19,7 +19,10 @@ import { EventLogComponent } from './event-log/event-log.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { PlayerInventoryComponent } from './player-inventory/player-inventory.component';
 import { ItemComponent } from './item/item.component';
-import { PlayerEquipmentComponent } from './player-equipment/player-equipment.component'; 
+import { PlayerEquipmentComponent } from './player-equipment/player-equipment.component';
+import { MapComponent } from './map/map.component'; 
+ import {MatListModule} from '@angular/material/list'; 
+import {MatCardModule} from '@angular/material/card'; 
 
 @NgModule({
   declarations: [
@@ -33,7 +36,8 @@ import { PlayerEquipmentComponent } from './player-equipment/player-equipment.co
     EventLogComponent,
     PlayerInventoryComponent,
     ItemComponent,
-    PlayerEquipmentComponent
+    PlayerEquipmentComponent,
+    MapComponent
   ],
   imports: [
     BrowserModule,
@@ -44,7 +48,9 @@ import { PlayerEquipmentComponent } from './player-equipment/player-equipment.co
     MatButtonModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatListModule,
+    MatCardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

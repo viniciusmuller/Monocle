@@ -7,7 +7,7 @@ import { Player } from '../types/models';
   styleUrls: ['./player.component.scss']
 })
 export class PlayerComponent implements OnInit {
-  @Input() player!: Player;
+  @Input() player?: Player;
 
   constructor() { }
   ngOnInit(): void { }

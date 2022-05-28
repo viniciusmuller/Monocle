@@ -1,15 +1,33 @@
 <div *ngIf="loggedIn; else notLoggedIn">
-    <h1>Hello!</h1>
-    <div id="items">
-        <app-server-details [serverInfo]="serverInfo" [totalPlayers]="players?.length ?? 0"></app-server-details>
-        <app-players-display [players]="players"></app-players-display>
-        <app-chat [messages]="chatLog"></app-chat>
-        <app-event-log [events]="eventLog"></app-event-log>
+    <div class="container-fluid">
+        <!-- TODO: Make these all columns the same height -->
+        <div class="row">
+            <div class="col-md">
+                <app-map (onPlayerSelected)="playerSelected($event)" [players]="players"></app-map>
+            </div>
+            <div class="col-md">
+                <app-player [player]="getSelectedPlayer()"></app-player>
+            </div>
+            <div class="col-md">
+                <app-server-details [serverInfo]="serverInfo" [totalPlayers]="players?.length ?? 0"></app-server-details>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <app-chat [messages]="chatLog"></app-chat>
+            </div>
+            <div class="col-md">
+                <app-event-log [events]="eventLog"></app-event-log>
+            </div>
+            <div class="col-md">
+                <app-players-display (onPlayerSelected)="playerSelected($event)" [players]="players"></app-players-display>
+            </div>
+        </div>
     </div>
 </div>
 
 <ng-template #notLoggedIn>
-    <div class="flex-center">
+    <div class="d-flex flex-column flex-center">
         <h1>Please connect to a Monocle server.</h1>
         <app-login-component (onSubmit)="connectAndLogin($event)"></app-login-component>
     </div>

@@ -1,32 +1,44 @@
-<mat-expansion-panel>
-    <mat-expansion-panel-header>
-        <mat-panel-title>
-             [{{player.reputation}}] {{player.name}}
-        </mat-panel-title>
-        <mat-panel-description>
-            <p>Joined: {{player.joined}}</p>
-        </mat-panel-description>
-    </mat-expansion-panel-header>
-    <p>HP: {{player.health}}</p>
-    <p>Ping: {{player.ping}}</p>
-    <p>Position: ({{round(player.position.x)}}, {{round(player.position.y)}}, {{round(player.position.z)}})</p>
-    <p>Rotation: {{round(player.rotation)}}°</p>
-    
-    <mat-expansion-panel>
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                Inventory
-            </mat-panel-title>
-        </mat-expansion-panel-header>
-        <app-player-inventory [items]="player.items"></app-player-inventory>
-    </mat-expansion-panel>
+<mat-card>
+    <mat-card-title>Current Player</mat-card-title>
 
-    <mat-expansion-panel>
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                Equipment
-            </mat-panel-title>
-        </mat-expansion-panel-header>
-        <app-player-equipment [equipment]="player.equipment"></app-player-equipment>
-    </mat-expansion-panel>
-</mat-expansion-panel>
+    <mat-card *ngIf="player; else noPlayer">
+        <mat-card-title>
+            {{player.name}}
+        </mat-card-title>
+
+        <mat-card-content>
+            <p>HP: {{player.health}}</p>
+            <p>Ping: {{player.ping}}</p>
+            <p>Position: ({{round(player.position.x)}}, {{round(player.position.y)}}, {{round(player.position.z)}})</p>
+            <p>Rotation: {{round(player.rotation)}}°</p>
+            <p>Reputation: {{player.reputation}}</p>
+            
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        Inventory
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <app-player-inventory [items]="player.items"></app-player-inventory>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        Equipment
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <app-player-equipment [equipment]="player.equipment"></app-player-equipment>
+            </mat-expansion-panel>
+
+            <div id="moderation-buttons">
+                <button mat-raised-button color="warn">Kick</button>
+                <button mat-raised-button color="warn">Ban</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</mat-card>
+
+<ng-template #noPlayer>
+    <mat-card>No player is currently selected.</mat-card>
+</ng-template>

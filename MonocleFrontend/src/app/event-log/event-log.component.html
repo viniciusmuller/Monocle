@@ -1,4 +1,6 @@
-<h2>Events</h2>
-<div>
-    <p *ngFor="let event of events">[{{event.time | date: 'mediumTime'}}] {{event.message}}</p>
-</div>
+<mat-card>
+    <mat-card-title>Events</mat-card-title>
+    <mat-list>
+        <mat-list-item *ngFor="let event of events">[{{event.time | date: 'mediumTime'}}] {{event.message}}</mat-list-item>
+    </mat-list>
+</mat-card>

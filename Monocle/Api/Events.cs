@@ -19,12 +19,14 @@ namespace Monocle.Api
         public PlayerModel? Killer;
         public PlayerModel Dead;
         public string Cause;
+        public DateTimeOffset Time;
 
         public PlayerDeathEvent(PlayerModel dead, PlayerModel? killer, string cause)
         {
             Dead = dead;
             Killer = killer;
             Cause = cause;
+            Time = DateTimeOffset.UtcNow;
         }
     }
 
@@ -33,6 +35,7 @@ namespace Monocle.Api
         public PlayerModel Author;
         public string Content;
         public string ColorHex;
+        public DateTimeOffset Time;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public ChatMode ChatMode;
@@ -43,6 +46,7 @@ namespace Monocle.Api
             Content = message;
             ChatMode = chatMode.ToMonocleChatMode();
             ColorHex = ColorUtility.ToHtmlStringRGB(color);
+            Time = DateTimeOffset.UtcNow;
         }
     }
 
@@ -54,7 +58,7 @@ namespace Monocle.Api
         public PlayerJoinOrLeaveEvent(PlayerModel player)
         {
             Player = player;
-            Time = DateTimeOffset.UtcNow; // TODO: Fix timezone
+            Time = DateTimeOffset.UtcNow;
         }
     }
 }

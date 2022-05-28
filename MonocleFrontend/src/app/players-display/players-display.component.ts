@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { Player } from '../types/models';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Player, PlayerId } from '../types/models';
 
 @Component({
   selector: 'app-players-display',
@@ -8,10 +8,14 @@ import { Player } from '../types/models';
 })
 export class PlayersDisplayComponent implements OnInit {
   @Input() players?: Player[];
+  @Output() onPlayerSelected = new EventEmitter<PlayerId>();
 
   constructor() { }
 
-  ngOnInit(): void {
+  ngOnInit(): void { }
+
+  playerSelected(player: Player) {
+    this.onPlayerSelected.emit(player.id);
   }
 
   trackPlayer(_index: number, player: Player) {
