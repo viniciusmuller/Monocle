@@ -20,6 +20,7 @@ export class LoginComponentComponent implements OnInit {
       port: [55554, [Validators.required]],
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
+      ssl: true,
     })
   }
 

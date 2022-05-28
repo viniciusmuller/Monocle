@@ -44,8 +44,9 @@ export class WebsocketService {
     this.onPlayerJoin = new Subject();
   }
 
-  public connect(host: string, port: number) {
-    this.subject = this.create(`ws://${host}:${port}`);
+  public connect(host: string, port: number, ssl: boolean) {
+    let protocol = ssl ? "wss" : "ws"; 
+    this.subject = this.create(`${protocol}://${host}:${port}`);
     this.connection = <Subject<any>>this.subject.pipe(
       map(
         (response: MessageEvent): any => {

@@ -11,7 +11,9 @@ namespace Monocle.Config
     public class MonocleConfiguration : IRocketPluginConfiguration
     {
         public string BindAddress { get; set; }
+        public string CertificatePath { get; set; }
         public int ListenPort { get; set; }
+        public bool UseSSL { get; set; }
         public List<AuthorizedUser> AuthorizedUsers { get; set; }
         public int MaxFailedLoginAttempts { get; set; }
 
@@ -28,6 +30,8 @@ namespace Monocle.Config
             BindAddress = "127.0.0.1";
             AuthorizedUsers = new List<AuthorizedUser>() { defaultAdmin };
             MaxFailedLoginAttempts = 5;
+            UseSSL = true;
+            CertificatePath = "";
         }
     }
 

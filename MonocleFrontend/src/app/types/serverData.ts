@@ -5,6 +5,7 @@ export interface LoginPayload {
     port: number;
     username: string;
     password: string;
+    ssl: boolean;
 }
 
 export interface ServerMessage {

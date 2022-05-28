@@ -21,7 +21,7 @@ export class ServerDashboardComponent implements OnInit {
   selectedPlayerId?: PlayerId;
 
   connectAndLogin(payload: LoginPayload) {
-    this.websocketService.connect(payload.host, payload.port);
+    this.websocketService.connect(payload.host, payload.port, payload.ssl);
     setTimeout(() => {
       this.websocketService.login(payload.username, payload.password);
     }, 1000);

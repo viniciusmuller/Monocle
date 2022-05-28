@@ -1,4 +1,4 @@
-<form [formGroup]="loginForm" id="login-form" (submit)="submit()">
+<form [formGroup]="loginForm" class="d-flex flex-column" (submit)="submit()">
     <mat-form-field>
         <mat-label>Host</mat-label>
         <input matInput placeholder="Host" formControlName="host" type="text" />
@@ -19,5 +19,7 @@
         <input matInput placeholder="Password" formControlName="password" type="password" />
     </mat-form-field>
 
-    <button mat-raised-button color="primary" type="submit">Submit</button>
+    <mat-checkbox formControlName="ssl">SSL</mat-checkbox>
+
+    <button mat-raised-button id="submit" color="primary" type="submit">Submit</button>
 </form>

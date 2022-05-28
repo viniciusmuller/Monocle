@@ -13,12 +13,9 @@ namespace Monocle
         {
             // TODO: Use rocket dependency injection
             Logger.Log($"{Name} {Assembly.GetName().Version} has been loaded!");
-            var bindAddress = Configuration.Instance.BindAddress;
-            var listenPort = Configuration.Instance.ListenPort;
             var unturnedService = new UnturnedService();
             ServerService = new ServerService(Configuration.Instance, unturnedService);
-            // TODO: No need to pass these since server service already has the Configuration instance
-            ServerService.Start(bindAddress, listenPort);
+            ServerService.Start();
         }
 
         protected override void Unload()

@@ -21,8 +21,9 @@ import { PlayerInventoryComponent } from './player-inventory/player-inventory.co
 import { ItemComponent } from './item/item.component';
 import { PlayerEquipmentComponent } from './player-equipment/player-equipment.component';
 import { MapComponent } from './map/map.component'; 
- import {MatListModule} from '@angular/material/list'; 
+import {MatListModule} from '@angular/material/list'; 
 import {MatCardModule} from '@angular/material/card'; 
+import {MatCheckboxModule} from '@angular/material/checkbox'; 
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import {MatCardModule} from '@angular/material/card';
     ReactiveFormsModule,
     MatExpansionModule,
     MatListModule,
-    MatCardModule
+    MatCardModule,
+    MatCheckboxModule
   ],
   providers: [],
   bootstrap: [AppComponent]
