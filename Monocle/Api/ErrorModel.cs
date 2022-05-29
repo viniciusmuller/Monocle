@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Monocle.Api
 {
-    internal class ErrorModel : Response
+    internal class ErrorModel
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ErrorType Type { get; set; }

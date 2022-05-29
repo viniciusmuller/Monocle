@@ -73,7 +73,13 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onPlayerDeath.subscribe(deathEvent => {
-      let message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
+      let message; 
+      if (!deathEvent.killer) {
+        message = `${deathEvent.dead.name} died! [${deathEvent.cause}]`
+      } else {
+        message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
+      }
+      
       let event = this.buildEvent(deathEvent.time, message);
       this.eventLog = [...this.eventLog, event];
     })

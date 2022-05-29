@@ -39,7 +39,8 @@ namespace Monocle.Services
                 MonocleVersion = MonocleVersion,
                 MapImageEncoded = Convert.ToBase64String(mapImage),
                 PlayersInQueue = Provider.queuePosition,
-                WorldSize = ParseLevelSize(Level.info.size)
+                WorldSize = Level.size,
+                BorderSize = Level.border,
             };
         }
 
@@ -99,19 +100,6 @@ namespace Monocle.Services
                 }
             }
             return playerInventory;
-        }
-
-        private int ParseLevelSize(ELevelSize levelSize)
-        {
-            return levelSize switch
-            {
-                ELevelSize.TINY => 512,
-                ELevelSize.SMALL => 1024,
-                ELevelSize.MEDIUM => 2048,
-                ELevelSize.LARGE => 4096,
-                ELevelSize.INSANE => 8192,
-                _ => 0,
-            };
         }
     }
 }

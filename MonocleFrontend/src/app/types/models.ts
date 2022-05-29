@@ -69,6 +69,7 @@ export interface ServerInfo {
     queueSize: number;
     playersInQueue: number;
     worldSize: number;
+    borderSize: number;
     mapImageEncoded: string;
 }
 

@@ -16,6 +16,7 @@ namespace Monocle.Models
         public int MaxPlayers { get; set; }
         public int CurrentPlayers { get; set; }
         public int WorldSize { get; set; }
+        public int BorderSize { get; set; }
         public int QueueSize { get; set; }
         public int PlayersInQueue { get; set; }
     }
