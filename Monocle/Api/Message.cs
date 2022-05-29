@@ -25,4 +25,10 @@ namespace Monocle.Api
             Data = data;
         }
     }
+
+    class PlayerScreenshotResponse
+    {
+        public string ScreenEncoded { get; set; }
+        public string PlayerId { get; set; }
+    }
 }

@@ -8,6 +8,11 @@ export interface LoginPayload {
     ssl: boolean;
 }
 
+export interface PlayerScreenshotResponse {
+    playerId: string;
+    screenEncoded: string;
+}
+
 export interface ServerMessage {
     kind: 'Response'         | 'Event'   | 'Error'
     type: ServerResponseType | EventType | ErrorType

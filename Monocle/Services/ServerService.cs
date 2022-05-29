@@ -141,8 +141,12 @@ namespace Monocle.Services
             {
                 try
                 {
-                    var response = ServeRequest(type, payload);
-                    SendMessage(socket, response);
+                    var response = ServeRequest(socket.ConnectionInfo.Id, type, payload);
+                    // TODO: Refactor how responses are handled
+                    if (response != null)
+                    {
+                        SendMessage(socket, response);
+                    }
                 } catch (ApiException ex)
                 {
                     var message = new ServerMessage<ErrorType, string>(MessageKind.Error, ex.ErrorModel.Type, ex.ErrorModel.Message);
@@ -169,7 +173,21 @@ namespace Monocle.Services
             }
         }
 
-        ServerMessage<ResponseType, dynamic> ServeRequest(RequestType? type, string payload)
+        private void GotScreenshot(string playerId, Guid socketId, byte[] jpg)
+        {
+            if (LoggedInUsers.TryGetValue(socketId, out var tuple))
+            {
+                var (socket, _) = tuple;
+                var message = BuildResponse(ResponseType.PlayerScreenshot, new PlayerScreenshotResponse
+                {
+                    PlayerId = playerId,
+                    ScreenEncoded = Convert.ToBase64String(jpg),
+                });
+                SendMessage(socket, message);
+            }
+        }
+
+        ServerMessage<ResponseType, dynamic> ServeRequest(Guid socketId, RequestType? type, string payload)
         {
             switch (type)
             {
@@ -190,9 +208,21 @@ namespace Monocle.Services
                 case RequestType.ServerInfo:
                     var serverInfo = UnturnedService.GetServerInfo();
                     return BuildResponse(ResponseType.ServerInfo, serverInfo);
+                case RequestType.PlayerScreenshot:
+                    var message = JsonConvert.DeserializeObject<Stub>(payload);
+                    if (message?.Data != null)
+                    {
+                        UnturnedService.ScreenshotPlayer(message.Data, socketId, GotScreenshot);
+                    }
+                    return null;
                 default:
                     throw new ArgumentException("We should never get an invalid request type here");
             }
+        }
+
+        private class Stub
+        {
+            public string Data { get; set; }
         }
         
         private ServerMessage<ResponseType, dynamic> BuildResponse<T>(ResponseType type, T data) => 

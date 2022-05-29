@@ -6,7 +6,7 @@
                 <app-map (onPlayerSelected)="playerSelected($event)" [serverInfo]="serverInfo" [vehicles]="vehicles" [players]="players"></app-map>
             </div>
             <div class="col-md">
-                <app-player [player]="getSelectedPlayer()"></app-player>
+                <app-player (onWatchRequest)="watchPlayer($event)" [player]="getSelectedPlayer()"></app-player>
             </div>
             <div class="col-md">
                 <app-server-details [serverInfo]="serverInfo" [totalPlayers]="players?.length ?? 0"></app-server-details>
@@ -21,6 +21,14 @@
             </div>
             <div class="col-md">
                 <app-players-display (onPlayerSelected)="playerSelected($event)" [players]="players"></app-players-display>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md d-flex flex-column" style="max-width: 640px; max-height: 480px;">
+                <ng-container *ngIf="imagePath">
+                    <button mat-raised-button color="primary" (click)="clearImage()">Clear image</button>
+                    <img [src]="imagePath">
+                </ng-container>
             </div>
         </div>
     </div>

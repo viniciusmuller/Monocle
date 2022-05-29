@@ -18,12 +18,19 @@ namespace Monocle.Services
 
         public List<PlayerModel> GetPlayers()
         {
-
-            var players = Provider.clients;
-            var playerModels = players.ConvertAll(p => new PlayerModel(p));
+            var playerModels = Provider.clients.ConvertAll(p => new PlayerModel(p));
             return playerModels;
         }
-        
+
+        public void ScreenshotPlayer(string playerId, Guid socketId, Action<string, Guid, byte[]> callback)
+        {
+            // TODO: Improve code
+            var client = Provider.clients.Find(p => p.playerID.steamID.ToString() == playerId);
+            client.player.sendScreenshot(CSteamID.Nil, (player, jpg) => {
+                callback(playerId, socketId, jpg);
+            });
+        }
+
         public ServerInfoModel GetServerInfo()
         {
             var mapImage = new byte[10]; // TODO: Read image
@@ -96,7 +103,7 @@ namespace Monocle.Services
 
                 foreach (var item in itemPack.items)
                 {
-                    playerInventory.Add(new ItemModel(item, item.GetName()));
+                    playerInventory.Add(new ItemModel(item, Utils.FindItem(item.item.id)!));
                 }
             }
             return playerInventory;

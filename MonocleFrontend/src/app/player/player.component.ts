@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Player } from '../types/models';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Player, PlayerId } from '../types/models';
 
 @Component({
   selector: 'app-player',
@@ -8,11 +8,18 @@ import { Player } from '../types/models';
 })
 export class PlayerComponent implements OnInit {
   @Input() player?: Player;
+  @Output() onWatchRequest = new EventEmitter<PlayerId>();
 
   constructor() { }
   ngOnInit(): void { }
 
   round(number: number): number {
     return Math.round(number)
+  }
+
+  emitWatchPlayer() {
+    if (this.player) {
+      this.onWatchRequest.emit(this.player.id);
+    }
   }
 }

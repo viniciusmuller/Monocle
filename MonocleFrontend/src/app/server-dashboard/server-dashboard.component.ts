@@ -20,12 +20,13 @@ export class ServerDashboardComponent implements OnInit {
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
   selectedPlayerId?: PlayerId;
+  imagePath?: string;
 
   connectAndLogin(payload: LoginPayload) {
     this.websocketService.connect(payload.host, payload.port, payload.ssl);
     setTimeout(() => {
       this.websocketService.login(payload.username, payload.password);
-    }, 1000);
+    }, 500);
   }
 
   constructor(private websocketService: WebsocketService) {
@@ -54,7 +55,6 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onGetVehicles.subscribe(vehicles => {
-      console.log(vehicles);
       this.vehicles = vehicles;
     })
 
@@ -63,19 +63,23 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onPlayerMessage.subscribe(playerMessage => {
-      this.chatLog = [...this.chatLog, playerMessage];
+      this.chatLog = [playerMessage, ...this.chatLog];
+    })
+
+    this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
+        this.imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
     })
 
     this.websocketService.onPlayerLeft.subscribe(leftEvent => {
       let message = `${leftEvent.player.name} left`;
       let event = this.buildEvent(leftEvent.time, message);
-      this.eventLog = [...this.eventLog, event];
+      this.eventLog = [event, ...this.eventLog];
     })
 
     this.websocketService.onPlayerJoin.subscribe(joinEvent => {
       let message = `${joinEvent.player.name} joined`;
       let event = this.buildEvent(joinEvent.time, message);
-      this.eventLog = [...this.eventLog, event];
+      this.eventLog = [event, ...this.eventLog];
     })
 
     this.websocketService.onPlayerDeath.subscribe(deathEvent => {
@@ -87,8 +91,16 @@ export class ServerDashboardComponent implements OnInit {
       }
       
       let event = this.buildEvent(deathEvent.time, message);
-      this.eventLog = [...this.eventLog, event];
+      this.eventLog = [event, ...this.eventLog];
     })
+  }
+
+  watchPlayer(id: PlayerId) {
+    this.getPlayerScreenshot(id);
+  }
+
+  clearImage() {
+    this.imagePath = undefined;
   }
 
   bindRequests() {
@@ -97,7 +109,8 @@ export class ServerDashboardComponent implements OnInit {
     const playerFetchInterval = interval(1000);
     playerFetchInterval.subscribe(() => this.getPlayers())
 
-    const vehicleFetchInterval = interval(15_000);
+    this.getVehicles()
+    const vehicleFetchInterval = interval(5_000);
     vehicleFetchInterval.subscribe(() => this.getVehicles())
 
     this.getBarricades();
@@ -127,6 +140,7 @@ export class ServerDashboardComponent implements OnInit {
   }
 
   getPlayers() { this.websocketService.getPlayers(); }
+  getPlayerScreenshot(id: PlayerId) { this.websocketService.getPlayerScreenshot(id); }
   getVehicles() { this.websocketService.getVehicles(); }
   getStructures() { this.websocketService.getStructures(); }
   getBarricades() { this.websocketService.getBarricades(); }

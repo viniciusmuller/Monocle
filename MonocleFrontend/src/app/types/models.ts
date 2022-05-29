@@ -1,6 +1,6 @@
-import { ChatMode } from "./enums";
+import { ChatMode, ItemRarity, VehicleType } from "./enums";
 
-export type PlayerId = number;
+export type PlayerId = string;
 
 export interface Position {
     x: number;
@@ -13,6 +13,7 @@ export interface Item {
     amount: number;
     id: number;
     durability: number;
+    rarity: ItemRarity;
 }
 
 export interface Equipment {
@@ -38,6 +39,7 @@ export interface Player {
     reputation: number;
     equipment: Equipment;
     joined?: number;
+    groupId: string;
     items: Item[];
 }
 
@@ -45,6 +47,8 @@ interface Building {
     name: string;
     health: number;
     position: Position;
+    groupId: string;
+    ownerId: PlayerId;
 }
 
 export interface Structure extends Building { }
@@ -57,6 +61,11 @@ export interface Vehicle {
     name: string;
     position: Position;
     id: number;
+    ownerId: PlayerId,
+    battery: number;
+    fuel: number;
+    health: number;
+    type: VehicleType;
 }
 
 export interface ServerInfo {

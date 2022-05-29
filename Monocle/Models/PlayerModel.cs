@@ -10,8 +10,7 @@ namespace Monocle.Models
 {
     internal class PlayerModel
     {
-        // TODO: Get group info
-        public ulong Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public bool IsAdmin { get; set; }
         public int Ping { get; set; }
@@ -21,34 +20,37 @@ namespace Monocle.Models
         public EquipmentModel Equipment { get; set; }
         public int Reputation { get; set; }
         public float? Joined { get; set; }
+        public string GroupId { get; set; }
         public List<ItemModel> Items { get; set; }
 
         public PlayerModel(SteamPlayer player)
         {
-            Id = player.playerID.steamID.m_SteamID;
+            Id = player.playerID.steamID.ToString();
             IsAdmin = player.isAdmin;
             Name = player.player.name;
-            Ping = (int)Math.Ceiling(player.ping);
+            Ping = (int)Math.Ceiling(player.ping * 1000);
             Position = player.player.transform.position.ToPosition();
             Health = player.player.life.health;
             Rotation = player.player.transform.rotation.eulerAngles.y;
             Equipment = new EquipmentModel(player);
             Joined = player.joined;
             Reputation = player.player.skills.reputation;
+            GroupId = player.player.quests.groupID.ToString();
             Items = GetItemsFromInventory(player.player.inventory);
         }
 
         public PlayerModel(UnturnedPlayer player)
         {
-            Id = player.CSteamID.m_SteamID;
+            Id = player.CSteamID.ToString();
             IsAdmin = player.IsAdmin;
             Name = player.DisplayName;
-            Ping = (int)Math.Ceiling(player.Ping);
+            Ping = (int)Math.Ceiling(player.Ping * 1000);
             Position = player.Position.ToPosition();
             Health = player.Health;
             Rotation = player.Rotation;
             Equipment = new EquipmentModel(player);
             Joined = null; // TODO: Get join from UnturnedPlayer
+            GroupId = player.SteamGroupID.ToString();
             Reputation = player.Reputation;
             Items = GetItemsFromInventory(player.Inventory);
         }
@@ -60,7 +62,7 @@ namespace Monocle.Models
 
             foreach (var page in pages)
             {
-                var pageItems = page.items.Select(i => new ItemModel(i, i.GetName()));
+                var pageItems = page.items.Select(i => new ItemModel(i, Utils.FindItem(i.item.id)!));
                 items.AddRange(pageItems);
             }
 

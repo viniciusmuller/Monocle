@@ -4,8 +4,8 @@ import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
-import { ServerMessage } from 'src/app/types/serverData';
-import { Barricade, Player, PlayerDeath, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
+import { PlayerScreenshotResponse, ServerMessage } from 'src/app/types/serverData';
+import { Barricade, Player, PlayerDeath, PlayerId, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -23,6 +23,7 @@ export class WebsocketService {
   public onGetStructures: Subject<Structure[]>;
   public onGetVehicles: Subject<Vehicle[]>;
   public onGetServerInfo: Subject<ServerInfo>;
+  public onGetPlayerScreenshot: Subject<PlayerScreenshotResponse>;
 
   // Events
   public onPlayerMessage: Subject<PlayerMessage>;
@@ -38,6 +39,7 @@ export class WebsocketService {
     this.onGetStructures = new Subject();
     this.onGetVehicles = new Subject();
     this.onGetServerInfo = new Subject();
+    this.onGetPlayerScreenshot = new Subject();
 
     // Events
     this.onLoginSuccessful = new Subject();
@@ -58,6 +60,9 @@ export class WebsocketService {
   }
 
   handleServerMessage(message: ServerMessage) {
+    console.log(message);
+
+
     // Response
     if (message.kind == 'Response') {
       const type = message.type as ServerResponseType;
@@ -80,6 +85,9 @@ export class WebsocketService {
 
         case ServerResponseType.ServerInfo:
           return this.onGetServerInfo.next(message.data as ServerInfo);
+
+        case ServerResponseType.PlayerScreenshot:
+          return this.onGetPlayerScreenshot.next(message.data as PlayerScreenshotResponse);
       }
     }
     
@@ -122,6 +130,10 @@ export class WebsocketService {
   public getServerDetails() {
     this.sendRequestType(RequestType.ServerInfo, null); 
   }
+  
+  public getPlayerScreenshot(id: PlayerId) {
+    this.sendRequestType(RequestType.PlayerScreenshot, id); 
+  }
 
   private sendRequestType<T>(type: RequestType, data: T) {
     if (this.connection) {
@@ -147,7 +159,7 @@ export class WebsocketService {
       error: () => { },
       complete: () => { },
       next: (data: Object) => {
-        // console.log('Message sent to websocket: ', data);
+        console.log('Message sent to websocket: ', data);
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(data));
         }

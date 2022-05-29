@@ -14,6 +14,7 @@ export enum RequestType
     Barricades = "Barricades",
     Vehicles = "Vehicles",
     ServerInfo = "ServerInfo",
+    PlayerScreenshot = "PlayerScreenshot",
 }
 
 export enum ServerResponseType
@@ -25,6 +26,7 @@ export enum ServerResponseType
     Barricades = "Barricades",
     Structures = "Structures",
     ServerInfo = "ServerInfo",
+    PlayerScreenshot = "PlayerScreenshot",
 }
 
 export enum EventType
@@ -36,9 +38,28 @@ export enum EventType
 }
 
 export enum ChatMode {
-    Local = "Local",
-    Global = "Global",
-    Group = "Group",
-    Say = "Say",
-    Welcome = "Welcome"
+    Local = 1,
+    Global,
+    Group,
+    Say,
+    Welcome
+}
+
+export enum VehicleType {
+    Car = 1,
+    Plane,
+    Helicopter,
+    Blimp,
+    Boat,
+    Train,
+}
+
+export enum ItemRarity
+{
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+    Mythical
 }

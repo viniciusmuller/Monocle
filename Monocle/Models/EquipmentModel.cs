@@ -63,13 +63,13 @@ namespace Monocle.Models
             var primary = player.player.inventory.items[0].items.FirstOrDefault();
             if (primary != null)
             {
-                Primary = new ItemModel(primary, primary.GetName());
+                Primary = new ItemModel(primary, Utils.FindItem(primary.item.id)!);
             }
 
             var secondary = player.player.inventory.items[1].items.FirstOrDefault();
             if (secondary != null)
             {
-                Secondary = new ItemModel(secondary, secondary.GetName());
+                Secondary = new ItemModel(secondary, Utils.FindItem(secondary.item.id)!);
             }
         }
 
