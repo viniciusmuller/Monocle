@@ -24,23 +24,6 @@ namespace Monocle.Services
             return playerModels;
         }
         
-        //public PlayerDetailsModel GetPlayerDetails(ulong? userId)
-        //{
-        //    if (userId == null)
-        //    {
-        //        throw new ApiException(ErrorType.InvalidRequestData, $"userId was not provided");
-        //    }
-
-        //    var result = Utils.TryGetPlayer(userId.Value, out var client);
-        //    if (!result)
-        //    {
-        //        throw new ApiException(ErrorType.UserNotFound, $"The user of ID {userId} was not found in the server.");
-        //    }
-
-        //    var playerInventory = FetchInventoryItems(client.player.inventory.items);
-        //    return new PlayerDetailsModel(client, playerInventory);
-        //}
-
         public ServerInfoModel GetServerInfo()
         {
             var mapImage = new byte[10]; // TODO: Read image
@@ -62,6 +45,11 @@ namespace Monocle.Services
 
         public List<BarricadeModel> GetBarricades()
         {
+            if (BarricadeManager.regions == null)
+            {
+                return new List<BarricadeModel>();
+            }
+
             var barricades = BarricadeManager.regions.Cast<BarricadeRegion>()
                                                      .SelectMany(x => x.drops);
 
@@ -71,6 +59,11 @@ namespace Monocle.Services
 
         public List<StructureModel> GetStructures()
         {
+            if (StructureManager.regions == null)
+            {
+                return new List<StructureModel>();
+            }
+
             var structures = StructureManager.regions.Cast<StructureRegion>()
                                                      .SelectMany(x => x.drops);
 

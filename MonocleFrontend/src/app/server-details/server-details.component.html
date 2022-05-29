@@ -1,14 +1,15 @@
 <mat-card>
     <mat-card-title>Info</mat-card-title>
-    <div id="server-details" *ngIf="serverInfo; else loading">
-        <div class="align-center players">
+    <ng-container *ngIf="serverInfo; else loading">
+        <mat-card-subtitle>{{serverInfo.serverName}}</mat-card-subtitle>
+        <div class="players d-flex align-items-center flex-column">
             <!-- TODO: Add background color to spinner -->
             <mat-progress-spinner type="determinate" value="{{totalPlayers / serverInfo.maxPlayers * 100}}"></mat-progress-spinner>
             <h2>{{ totalPlayers }} / {{serverInfo.maxPlayers }} players ({{serverInfo.playersInQueue}} in queue)</h2>
         </div>
         <p>Connected to Monocle v{{serverInfo.monocleVersion}}, server running Unturned v{{serverInfo.unturnedVersion}}</p>
         <p>Map {{serverInfo.mapName}}, {{serverInfo.worldSize}}x{{serverInfo.worldSize}}</p>
-    </div>
+    </ng-container>
 </mat-card>
 
 <ng-template #loading>

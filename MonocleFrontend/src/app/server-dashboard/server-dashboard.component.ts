@@ -86,16 +86,16 @@ export class ServerDashboardComponent implements OnInit {
     playerFetchInterval.subscribe(() => this.getPlayers())
 
     this.getBarricades();
-    const barricadesFetchInterval = interval(10000);
+    const barricadesFetchInterval = interval(60_0000);
     barricadesFetchInterval.subscribe(() => this.getBarricades())
 
     this.getStructures();
-    const structuresFetchInterval = interval(10000);
+    const structuresFetchInterval = interval(60_0000);
     structuresFetchInterval.subscribe(() => this.getStructures())
 
     // TODO: Find more elegant approach to these
     this.getServerDetails();
-    const serverDetailsFetchInterval = interval(3000);
+    const serverDetailsFetchInterval = interval(60_000);
     serverDetailsFetchInterval.subscribe(() => this.getServerDetails())
   }
 

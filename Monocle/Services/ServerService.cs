@@ -2,7 +2,6 @@
 using Monocle.Api;
 using Monocle.Config;
 using Monocle.Exceptions;
-using Monocle.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Rocket.Core.Logging;
@@ -13,9 +12,6 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Monocle.Services
 {
@@ -54,21 +50,8 @@ namespace Monocle.Services
 
         private WebSocketServer ConfigureServer()
         {
-            var protocol = Config.UseSSL ? "wss" : "ws";
-            var url = $"{protocol}://{Config.BindAddress}:{Config.ListenPort}";
+            var url = $"ws://{Config.BindAddress}:{Config.ListenPort}";
             var server = new WebSocketServer(url);
-
-            if (Config.UseSSL && string.IsNullOrWhiteSpace(Config.CertificatePath))
-            {
-                throw new ArgumentException("A path to a certificate is required when UseSSL is set.");
-            }
-
-            if (Config.UseSSL && !string.IsNullOrWhiteSpace(Config.CertificatePath))
-            {
-                server.Certificate = new X509Certificate2(Config.CertificatePath);
-                Logger.Log($"Succesfully loaded the certificate");
-            }
-
             Logger.Log($"Starting WebSocket server at {url}");
             return server;
         }

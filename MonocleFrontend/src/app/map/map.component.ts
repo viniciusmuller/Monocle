@@ -24,8 +24,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
       crs: L.CRS.Simple
     });
 
-    const bounds = L.latLngBounds([-1000, -1000], [1000, 1000]);
-    const image = L.imageOverlay('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fvignette.wikia.nocookie.net%2Funturned-bunker%2Fimages%2F1%2F18%2FPEIGPS.png%2Frevision%2Flatest%2Fscale-to-width-down%2F2000%3Fcb%3D20180719042857%26path-prefix%3Dzh&f=1&nofb=1', bounds);
+    const bounds = L.latLngBounds([-1024, -1024], [1024, 1024]);
+    const image = L.imageOverlay('https://i.imgur.com/gqoRnQd.jpg', bounds);
     image.addTo(this.map);
     this.map.fitBounds(bounds);
   }
@@ -52,7 +52,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       iconUrl: '/assets/img/unturned-zombie.jpg',
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
-      iconAnchor:   [24, 24], // point of the icon which will correspond to marker's location
+      iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
       shadowAnchor: [0, 0],  // the same for the shadow
       popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
     });

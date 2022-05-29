@@ -47,7 +47,7 @@ namespace Monocle.Models
 
             if (clothing.shirt != NotFoundId)
             {
-                Shirt = new ItemModel(Utils.FindItem(clothing.pants)!, clothing.pantsQuality);
+                Shirt = new ItemModel(Utils.FindItem(clothing.shirt)!, clothing.shirtQuality);
             }
 
             if (clothing.mask != NotFoundId)
