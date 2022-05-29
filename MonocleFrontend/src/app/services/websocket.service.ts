@@ -60,8 +60,6 @@ export class WebsocketService {
   }
 
   handleServerMessage(message: ServerMessage) {
-    console.log(message);
-
 
     // Response
     if (message.kind == 'Response') {
@@ -159,7 +157,6 @@ export class WebsocketService {
       error: () => { },
       complete: () => { },
       next: (data: Object) => {
-        console.log('Message sent to websocket: ', data);
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(data));
         }

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { interval, tap } from 'rxjs';
-import { Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
+import { Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
 
 
 @Component({
@@ -60,6 +60,18 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
   }
 
+  calculateGearScore(items: Item[]) {
+    if (items.length < 12) {
+      return 0;
+    }
+
+    let sum = items.reduce((acc, item) => {
+      return item.rarity + acc
+    }, 0);
+
+    return sum / items.length;
+  }
+
   refreshPlayerMarkers() {
     if (this.players && this.serverInfo) {
       if (this.playerMarkers) {
@@ -103,10 +115,24 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   createPlayerMarker(player: Player): L.Marker {
-    let iconUrl = player.health == 0 ? '/assets/img/player-dead.png' : '/assets/img/neutral.png';
+    let iconAsset = '';
+    let gearScore = this.calculateGearScore(player.items);
+    console.log([player, gearScore])
+
+    if (gearScore > 1.0) {
+      iconAsset = 'raider.png';
+    } else if (gearScore > 0.6) {
+      iconAsset = 'geared.png';
+    } else {
+      iconAsset = 'neutral.png';
+    }
+
+    if (player.health == 0) {
+      iconAsset = 'player-dead.png';
+    }
 
     const playerIcon = L.icon({
-      iconUrl,
+      iconUrl: `/assets/img/${iconAsset}`,
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
       iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
