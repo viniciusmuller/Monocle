@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure } from '../types/models';
+import { Barricade, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
 
@@ -15,6 +15,7 @@ export class ServerDashboardComponent implements OnInit {
   players?: Player[];
   barricades?: Barricade[];
   structures?: Structure[];
+  vehicles?: Vehicle[];
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
@@ -50,6 +51,11 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onGetStructures.subscribe(structures => {
       this.structures = structures;
+    })
+
+    this.websocketService.onGetVehicles.subscribe(vehicles => {
+      console.log(vehicles);
+      this.vehicles = vehicles;
     })
 
     this.websocketService.onGetServerInfo.subscribe(serverDetails => {
@@ -91,6 +97,9 @@ export class ServerDashboardComponent implements OnInit {
     const playerFetchInterval = interval(1000);
     playerFetchInterval.subscribe(() => this.getPlayers())
 
+    const vehicleFetchInterval = interval(15_000);
+    vehicleFetchInterval.subscribe(() => this.getVehicles())
+
     this.getBarricades();
     const barricadesFetchInterval = interval(60_0000);
     barricadesFetchInterval.subscribe(() => this.getBarricades())
@@ -117,19 +126,9 @@ export class ServerDashboardComponent implements OnInit {
     return this.players?.find(p => p.id == this.selectedPlayerId);
   }
 
-  getPlayers() {
-    this.websocketService.getPlayers();
-  }
-
-  getStructures() {
-    this.websocketService.getStructures();
-  }
-
-  getBarricades() {
-    this.websocketService.getBarricades();
-  }
-
-  getServerDetails() {
-    this.websocketService.getServerDetails();
-  }
+  getPlayers() { this.websocketService.getPlayers(); }
+  getVehicles() { this.websocketService.getVehicles(); }
+  getStructures() { this.websocketService.getStructures(); }
+  getBarricades() { this.websocketService.getBarricades(); }
+  getServerDetails() { this.websocketService.getServerDetails(); }
 }

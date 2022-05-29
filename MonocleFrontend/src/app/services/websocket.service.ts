@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
 import { ServerMessage } from 'src/app/types/serverData';
-import { Barricade, Player, PlayerDeath, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure } from 'src/app/types/models';
+import { Barricade, Player, PlayerDeath, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
 
 export interface ServerResponse {
   type: string;
@@ -21,6 +21,7 @@ export class WebsocketService {
   public onGetPlayers: Subject<Player[]>;
   public onGetBarricades: Subject<Barricade[]>;
   public onGetStructures: Subject<Structure[]>;
+  public onGetVehicles: Subject<Vehicle[]>;
   public onGetServerInfo: Subject<ServerInfo>;
 
   // Events
@@ -35,6 +36,7 @@ export class WebsocketService {
     this.onGetPlayers = new Subject();
     this.onGetBarricades = new Subject();
     this.onGetStructures = new Subject();
+    this.onGetVehicles = new Subject();
     this.onGetServerInfo = new Subject();
 
     // Events
@@ -47,13 +49,12 @@ export class WebsocketService {
   public connect(host: string, port: number, ssl: boolean) {
     let protocol = ssl ? "wss" : "ws"; 
     this.subject = this.create(`${protocol}://${host}:${port}`);
-    this.connection = <Subject<any>>this.subject.pipe(
-      map(
-        (response: MessageEvent): any => {
-          return JSON.parse(response.data);
-        }
-      ));
+    this.connection = <Subject<any>>this.subject.pipe(map(this.deserialize));
     this.connection.subscribe(this.handleServerMessage.bind(this));
+  }
+
+  deserialize(response: MessageEvent): any {
+    return JSON.parse(response.data);
   }
 
   handleServerMessage(message: ServerMessage) {
@@ -73,6 +74,9 @@ export class WebsocketService {
 
         case ServerResponseType.Structures:
           return this.onGetStructures.next(message.data as Structure[]);
+
+        case ServerResponseType.Vehicles:
+          return this.onGetVehicles.next(message.data as Vehicle[]);
 
         case ServerResponseType.ServerInfo:
           return this.onGetServerInfo.next(message.data as ServerInfo);
@@ -101,6 +105,10 @@ export class WebsocketService {
 
   public getPlayers() {
     this.sendRequestType(RequestType.Players, null); 
+  }
+
+  public getVehicles() {
+    this.sendRequestType(RequestType.Vehicles, null); 
   }
 
   public getBarricades() {
