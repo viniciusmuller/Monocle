@@ -96,7 +96,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   refreshBaseMarkers() {
     if (this.bases && this.serverInfo) {
-      for (let mark of this.playerMarkers) {
+      for (let mark of this.baseMarkers) {
         mark.remove();
       }
       this.playerMarkers = [];

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { interval, Observable, of } from 'rxjs';
+import { interval, Observable, of, timer } from 'rxjs';
 import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
@@ -125,7 +125,9 @@ export class ServerDashboardComponent implements OnInit {
     const structuresFetchInterval = interval(60_000);
     structuresFetchInterval.subscribe(() => this.getStructures())
 
-    this.findBases()
+    setTimeout(() => {
+      this.findBases()
+    }, 1000)
     const findBasesInterval = interval(60_000);
     findBasesInterval.subscribe(() => this.findBases())
 
