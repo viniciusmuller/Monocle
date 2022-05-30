@@ -137,7 +137,6 @@ export class ServerDashboardComponent implements OnInit {
 
   findBases() {
     if (this.barricades && this.structures) {
-      this.bases = [];
       let groupedBarricades = _.groupBy(this.barricades, ({ groupId }) => groupId);
       let groupedStructures = _.groupBy(this.structures, ({ groupId }) => groupId);
 

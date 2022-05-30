@@ -151,7 +151,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
     }
 
     const playerIcon = L.icon({
-      iconUrl: `/assets/img/${iconAsset}`,
+      // TODO: Create helper function to create icons
+      iconUrl: `assets/img/${iconAsset}`,
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
       iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
@@ -166,7 +167,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   createBaseMarker(base: Base): L.Marker {
     const playerIcon = L.icon({
-      iconUrl: '/assets/img/simple-base.png',
+      iconUrl: 'assets/img/simple-base.png',
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
       iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
@@ -181,7 +182,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   createVehicleMarker(vehicle: Vehicle): L.Marker {
     const playerIcon = L.icon({
-      iconUrl: '/assets/img/vehicle.png',
+      iconUrl: 'assets/img/vehicle.png',
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
       iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
