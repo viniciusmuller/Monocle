@@ -4,3 +4,5 @@
 - Make map focus player when selecting it
 - Add other administrative functions
 - Use MessagePack as the serialization protocol
+- Display server time and weather in server details
+- Add ability to select and browse vehicles and bases
