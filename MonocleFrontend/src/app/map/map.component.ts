@@ -99,7 +99,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       for (let mark of this.baseMarkers) {
         mark.remove();
       }
-      this.playerMarkers = [];
+      this.baseMarkers = [];
 
       for (let base of this.bases) {
         let baseMarker = this.createBaseMarker(base);
