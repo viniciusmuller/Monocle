@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { interval, tap } from 'rxjs';
-import { Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
+import { Base, Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
 
 
 @Component({
@@ -12,17 +12,20 @@ import { Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() players?: Player[];
   @Input() vehicles?: Vehicle[];
+  @Input() bases?: Base[];
   @Input() serverInfo?: ServerInfo;
   @Output() onPlayerSelected = new EventEmitter<PlayerId>();
 
   private map!: L.Map;
   private playerMarkers: L.Marker[];
   private vehicleMarkers: L.Marker[];
+  private baseMarkers: L.Marker[];
   private meter?: number;
 
   constructor() { 
     this.playerMarkers = [];
     this.vehicleMarkers = [];
+    this.baseMarkers = [];
 
     const subscription = interval(1000)
       .pipe(tap(() => {
@@ -43,6 +46,10 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     if (changes['vehicles'] && this.map) {
       this.refreshVehicleMarkers();
+    }
+
+    if (changes['bases'] && this.map) {
+      this.refreshBaseMarkers();
     }
   }
 
@@ -74,17 +81,30 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   refreshPlayerMarkers() {
     if (this.players && this.serverInfo) {
-      if (this.playerMarkers) {
-        for (let mark of this.playerMarkers) {
-          mark.remove();
-        }
-        this.playerMarkers = [];
+      for (let mark of this.playerMarkers) {
+        mark.remove();
       }
+      this.playerMarkers = [];
 
       for (let player of this.players) {
         let playerMarker = this.createPlayerMarker(player);
         playerMarker.addTo(this.map);
         this.playerMarkers?.push(playerMarker)
+      }
+    }
+  }
+
+  refreshBaseMarkers() {
+    if (this.bases && this.serverInfo) {
+      for (let mark of this.playerMarkers) {
+        mark.remove();
+      }
+      this.playerMarkers = [];
+
+      for (let base of this.bases) {
+        let baseMarker = this.createBaseMarker(base);
+        baseMarker.addTo(this.map);
+        this.baseMarkers?.push(baseMarker);
       }
     }
   }
@@ -117,7 +137,6 @@ export class MapComponent implements AfterViewInit, OnChanges {
   createPlayerMarker(player: Player): L.Marker {
     let iconAsset = '';
     let gearScore = this.calculateGearScore(player.items);
-    console.log([player, gearScore])
 
     if (gearScore > 1.0) {
       iconAsset = 'raider.png';
@@ -143,6 +162,21 @@ export class MapComponent implements AfterViewInit, OnChanges {
     let marker = this.createMarker(player.position, playerIcon);
     let onClick = () => this.onPlayerSelected.emit(player.id);
     return marker.on('click', onClick.bind(this));
+  }
+
+  createBaseMarker(base: Base): L.Marker {
+    const playerIcon = L.icon({
+      iconUrl: '/assets/img/simple-base.png',
+      iconSize:     [24, 24], // size of the icon
+      shadowSize:   [0, 0], // size of the shadow
+      iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
+      shadowAnchor: [0, 0],  // the same for the shadow
+      popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+
+    let marker = this.createMarker(base.position, playerIcon);
+    let onClick = () => console.log(base);
+    return marker.on('click', onClick);
   }
 
   createVehicleMarker(vehicle: Vehicle): L.Marker {

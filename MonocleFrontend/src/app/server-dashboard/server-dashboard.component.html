@@ -3,7 +3,7 @@
         <!-- TODO: Make these all columns the same height -->
         <div class="row">
             <div class="col-md">
-                <app-map (onPlayerSelected)="playerSelected($event)" [serverInfo]="serverInfo" [vehicles]="vehicles" [players]="players"></app-map>
+                <app-map (onPlayerSelected)="playerSelected($event)" [serverInfo]="serverInfo" [bases]="bases" [vehicles]="vehicles" [players]="players"></app-map>
             </div>
             <div class="col-md">
                 <app-player (onWatchRequest)="watchPlayer($event)" [player]="getSelectedPlayer()"></app-player>

@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of } from 'rxjs';
-import { Barricade, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
+import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
 import { LoginPayload } from '../types/serverData';
 import { WebsocketService } from '../services/websocket.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-server-dashboard',
@@ -16,9 +17,11 @@ export class ServerDashboardComponent implements OnInit {
   barricades?: Barricade[];
   structures?: Structure[];
   vehicles?: Vehicle[];
+  bases: Base[];
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
+  // TODO: Support selecting vehicles and bases
   selectedPlayerId?: PlayerId;
   imagePath?: string;
 
@@ -32,6 +35,7 @@ export class ServerDashboardComponent implements OnInit {
   constructor(private websocketService: WebsocketService) {
     this.chatLog = [];
     this.eventLog = [];
+    this.bases = [];
   }
 
   ngOnInit(): void {
@@ -67,7 +71,7 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
-        this.imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
+      this.imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
     })
 
     this.websocketService.onPlayerLeft.subscribe(leftEvent => {
@@ -83,13 +87,13 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onPlayerDeath.subscribe(deathEvent => {
-      let message; 
+      let message;
       if (!deathEvent.killer) {
         message = `${deathEvent.dead.name} died! [${deathEvent.cause}]`
       } else {
         message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
       }
-      
+
       let event = this.buildEvent(deathEvent.time, message);
       this.eventLog = [event, ...this.eventLog];
     })
@@ -114,17 +118,85 @@ export class ServerDashboardComponent implements OnInit {
     vehicleFetchInterval.subscribe(() => this.getVehicles())
 
     this.getBarricades();
-    const barricadesFetchInterval = interval(60_0000);
+    const barricadesFetchInterval = interval(60_000);
     barricadesFetchInterval.subscribe(() => this.getBarricades())
 
     this.getStructures();
-    const structuresFetchInterval = interval(60_0000);
+    const structuresFetchInterval = interval(60_000);
     structuresFetchInterval.subscribe(() => this.getStructures())
+
+    this.findBases()
+    const findBasesInterval = interval(60_000);
+    findBasesInterval.subscribe(() => this.findBases())
 
     // TODO: Find more elegant approach to these
     this.getServerDetails();
     const serverDetailsFetchInterval = interval(60_000);
     serverDetailsFetchInterval.subscribe(() => this.getServerDetails())
+  }
+
+  findBases() {
+    if (this.barricades && this.structures) {
+      this.bases = [];
+      let groupedBarricades = _.groupBy(this.barricades, ({ groupId }) => groupId);
+      let groupedStructures = _.groupBy(this.structures, ({ groupId }) => groupId);
+
+      let bases: { [key: string]: Base } = {};
+      let baseBarricades: { [key: string]: number } = {};
+
+      for (let [groupId, barricades] of Object.entries(groupedBarricades)) {
+        if (groupId == '0' || barricades.length < 4) {
+          continue;
+        }
+
+        bases[groupId] = {
+          groupId,
+          barricades,
+          position: { x: 0, y: 0, z: 0 },
+          structures: [],
+        };
+
+        for (let barricade of barricades) {
+          let pos = barricade.position;
+          var base = bases[groupId];
+          base.position.x += pos.x;
+          base.position.y += pos.y;
+          base.position.z += pos.z;
+        }
+
+        baseBarricades[groupId] = barricades.length;
+      }
+
+      for (let [groupId, structures] of Object.entries(groupedStructures)) {
+        if (structures.length < 5) {
+          continue;
+        }
+
+        var base = bases[groupId];
+
+        if (!base) {
+          // Ignore groups that only put structres
+          continue;
+        }
+
+        for (let structure of structures) {
+          let pos = structure.position;
+
+          base.position.x += pos.x;
+          base.position.y += pos.y;
+          base.position.z += pos.z;
+        }
+
+        let totalStructuresAndBarricades = baseBarricades[groupId];
+        totalStructuresAndBarricades += structures.length;
+        base.structures = structures;
+        base.position.x /= totalStructuresAndBarricades;
+        base.position.y /= totalStructuresAndBarricades;
+        base.position.z /= totalStructuresAndBarricades;
+      }
+
+      this.bases = Object.values(bases);
+    }
   }
 
   buildEvent(time: Date, message: string): MonocleEvent {

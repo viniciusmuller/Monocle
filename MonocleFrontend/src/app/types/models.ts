@@ -51,6 +51,13 @@ interface Building {
     ownerId: PlayerId;
 }
 
+export interface Base {
+    groupId: string;
+    structures: Structure[];
+    barricades: Barricade[];
+    position: Position;
+}
+
 export interface Structure extends Building { }
 export interface Barricade extends Building {
     items?: Item[];
