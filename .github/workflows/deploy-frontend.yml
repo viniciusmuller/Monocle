@@ -33,7 +33,7 @@ jobs:
 
       - name: deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
+        working-directory: ./MonocleFrontend
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-        working-directory: ./MonocleFrontend
