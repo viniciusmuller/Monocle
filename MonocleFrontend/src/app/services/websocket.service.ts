@@ -2,10 +2,12 @@ import { Observable, Observer } from 'rxjs';
 import { AnonymousSubject } from 'rxjs/internal/Subject';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { EventType, RequestType, ServerResponseType } from "src/app/types/enums";
 import { Injectable } from '@angular/core';
-import { PlayerScreenshotResponse, ServerMessage } from 'src/app/types/serverData';
+import { ServerMessage, ServerMessageType } from 'src/app/types/server';
 import { Barricade, Player, PlayerDeath, PlayerId, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
+import { PlayerScreenshotResponse, SuccesfulAuthenticationResponse } from '../types/responses';
+import { RequestType } from '../types/requests';
+import { InternalServerError, UserNotFoundError } from '../types/errors';
 
 export interface ServerResponse {
   type: string;
@@ -17,36 +19,23 @@ export class WebsocketService {
   private connection: Subject<any> | null = null;
 
   // Responses
-  public onLoginSuccessful: Subject<void>;
-  public onGetPlayers: Subject<Player[]>;
-  public onGetBarricades: Subject<Barricade[]>;
-  public onGetStructures: Subject<Structure[]>;
-  public onGetVehicles: Subject<Vehicle[]>;
-  public onGetServerInfo: Subject<ServerInfo>;
-  public onGetPlayerScreenshot: Subject<PlayerScreenshotResponse>;
+  public onLoginSuccessful: Subject<SuccesfulAuthenticationResponse> = new Subject();
+  public onGetPlayers: Subject<Player[]> = new Subject();
+  public onGetBarricades: Subject<Barricade[]> = new Subject();
+  public onGetStructures: Subject<Structure[]> = new Subject();
+  public onGetVehicles: Subject<Vehicle[]> = new Subject();
+  public onGetServerInfo: Subject<ServerInfo> = new Subject();
+  public onGetPlayerScreenshot: Subject<PlayerScreenshotResponse> = new Subject();
 
   // Events
-  public onPlayerMessage: Subject<PlayerMessage>;
-  public onPlayerLeft: Subject<PlayerJoinOrLeave>;
-  public onPlayerJoin: Subject<PlayerJoinOrLeave>;
-  public onPlayerDeath: Subject<PlayerDeath>;
+  public onPlayerMessage: Subject<PlayerMessage> = new Subject();
+  public onPlayerLeft: Subject<PlayerJoinOrLeave> = new Subject();
+  public onPlayerJoin: Subject<PlayerJoinOrLeave> = new Subject();
+  public onPlayerDeath: Subject<PlayerDeath> = new Subject();
 
-  constructor() {
-    // Responses
-    this.onPlayerMessage = new Subject();
-    this.onGetPlayers = new Subject();
-    this.onGetBarricades = new Subject();
-    this.onGetStructures = new Subject();
-    this.onGetVehicles = new Subject();
-    this.onGetServerInfo = new Subject();
-    this.onGetPlayerScreenshot = new Subject();
-
-    // Events
-    this.onLoginSuccessful = new Subject();
-    this.onPlayerDeath = new Subject();
-    this.onPlayerLeft = new Subject();
-    this.onPlayerJoin = new Subject();
-  }
+  // Errors
+  public internalServerError: Subject<InternalServerError> = new Subject();
+  public userNotFound: Subject<UserNotFoundError> = new Subject();
 
   public connect(host: string, port: number, ssl: boolean) {
     let protocol = ssl ? "wss" : "ws"; 
@@ -59,53 +48,50 @@ export class WebsocketService {
     return JSON.parse(response.data);
   }
 
-  handleServerMessage(message: ServerMessage) {
-
+  handleServerMessage(message: ServerMessage<any>) {
     // Response
-    if (message.kind == 'Response') {
-      const type = message.type as ServerResponseType;
+    switch (message.type) {
+      case ServerMessageType.SuccessfulLogin:
+        return this.onLoginSuccessful.next(message.data as SuccesfulAuthenticationResponse);
 
-      switch (type) {
-        case ServerResponseType.SuccessfulLogin:
-          return this.onLoginSuccessful.next();
+      case ServerMessageType.Players:
+        return this.onGetPlayers.next(message.data as Player[]);
 
-        case ServerResponseType.Players:
-          return this.onGetPlayers.next(message.data as Player[]);
+      case ServerMessageType.Barricades:
+        return this.onGetBarricades.next(message.data as Barricade[]);
 
-        case ServerResponseType.Barricades:
-          return this.onGetBarricades.next(message.data as Barricade[]);
+      case ServerMessageType.Structures:
+        return this.onGetStructures.next(message.data as Structure[]);
 
-        case ServerResponseType.Structures:
-          return this.onGetStructures.next(message.data as Structure[]);
+      case ServerMessageType.Vehicles:
+        return this.onGetVehicles.next(message.data as Vehicle[]);
 
-        case ServerResponseType.Vehicles:
-          return this.onGetVehicles.next(message.data as Vehicle[]);
+      case ServerMessageType.ServerInfo:
+        return this.onGetServerInfo.next(message.data as ServerInfo);
 
-        case ServerResponseType.ServerInfo:
-          return this.onGetServerInfo.next(message.data as ServerInfo);
+      case ServerMessageType.PlayerScreenshot:
+        console.log(message);
+        return this.onGetPlayerScreenshot.next(message.data as PlayerScreenshotResponse);
 
-        case ServerResponseType.PlayerScreenshot:
-          return this.onGetPlayerScreenshot.next(message.data as PlayerScreenshotResponse);
-      }
-    }
-    
-    // Events
-    if (message.kind == 'Event') {
-      const type = message.type as EventType;
+      // Events
+      case ServerMessageType.OnPlayerMessage:
+        return this.onPlayerMessage.next(message.data as PlayerMessage);
 
-      switch (type) {
-        case EventType.PlayerMessage:
-          return this.onPlayerMessage.next(message.data as PlayerMessage);
+      case ServerMessageType.OnPlayerDeath:
+        return this.onPlayerDeath.next(message.data as PlayerDeath);
 
-        case EventType.PlayerDeath:
-          return this.onPlayerDeath.next(message.data as PlayerDeath);
+      case ServerMessageType.OnPlayerLeft:
+        return this.onPlayerLeft.next(message.data as PlayerJoinOrLeave);
 
-        case EventType.PlayerLeft:
-          return this.onPlayerLeft.next(message.data as PlayerJoinOrLeave);
+      case ServerMessageType.OnPlayerJoined:
+        return this.onPlayerJoin.next(message.data as PlayerJoinOrLeave);
 
-        case EventType.PlayerJoined:
-          return this.onPlayerJoin.next(message.data as PlayerJoinOrLeave);
-      }
+      // Errors
+      case ServerMessageType.InternalServerError:
+        return this.internalServerError.next(message.data as InternalServerError);
+
+      case ServerMessageType.UserNotFound:
+        return this.userNotFound.next(message.data as UserNotFoundError);
     }
   }
 
@@ -130,7 +116,8 @@ export class WebsocketService {
   }
   
   public getPlayerScreenshot(id: PlayerId) {
-    this.sendRequestType(RequestType.PlayerScreenshot, id); 
+    let request = { userId: id };
+    this.sendRequestType(RequestType.PlayerScreenshot, request); 
   }
 
   private sendRequestType<T>(type: RequestType, data: T) {
@@ -145,6 +132,7 @@ export class WebsocketService {
     }
   }
 
+  // TODO: Big refactor in websocket service
   private create(url: string): AnonymousSubject<MessageEvent> {
     let ws = new WebSocket(url);
     let observable = new Observable((obs: Observer<MessageEvent>) => {

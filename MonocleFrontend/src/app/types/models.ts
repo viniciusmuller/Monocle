@@ -1,5 +1,6 @@
 import { ChatMode, ItemRarity, VehicleType } from "./enums";
 
+// TODO: Try to use ids as numbers
 export type PlayerId = string;
 
 export interface Position {
@@ -44,11 +45,18 @@ export interface Player {
 }
 
 interface Building {
+    id: number;
     name: string;
     health: number;
     position: Position;
     groupId: string;
     ownerId: PlayerId;
+    instanceId: string;
+}
+
+export interface Structure extends Building { }
+export interface Barricade extends Building {
+    items?: Item[];
 }
 
 export interface Base {
@@ -58,16 +66,12 @@ export interface Base {
     position: Position;
 }
 
-export interface Structure extends Building { }
-export interface Barricade extends Building {
-    items?: Item[];
-}
-
 export interface Vehicle {
     isLocked: boolean;
     name: string;
     position: Position;
     id: number;
+    instanceId: string;
     ownerId: PlayerId,
     battery: number;
     fuel: number;

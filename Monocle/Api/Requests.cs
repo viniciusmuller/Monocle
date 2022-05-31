@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 namespace Monocle.Api
 {
+    internal enum RequestType
+    {
+        Unknown,
+        Authenticate,
+        Players,
+        Structures,
+        Barricades,
+        Vehicles,
+        ServerInfo,
+        PlayerScreenshot,
+    }
 
     internal class LoginRequest
     {
@@ -15,14 +26,16 @@ namespace Monocle.Api
         public string? Password { get; set; }
     }
 
-    internal class GetUserInfoRequest
+    internal class PlayerScreenshotRequest
     {
-        public ulong? UserId { get; set; }
+        public string? UserId { get; set; }
     }
 
-    internal class BaseRequest
+    internal class BaseRequest<T>
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public RequestType? Type { get; set; }
+
+        // We can't know the type data that an user sends until we cast it
+        public T? Data { get; set; }
     }
 }

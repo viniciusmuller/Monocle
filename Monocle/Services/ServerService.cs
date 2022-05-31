@@ -1,7 +1,7 @@
 ﻿using Fleck;
 using Monocle.Api;
 using Monocle.Config;
-using Monocle.Exceptions;
+using Monocle.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Rocket.Core.Logging;
@@ -17,7 +17,7 @@ namespace Monocle.Services
 {
     internal class ServerService
     {
-        WebSocketServer SocketServer { get; set; }
+        WebSocketServer? SocketServer { get; set; }
         Dictionary<Guid, (IWebSocketConnection, AuthorizedUser)> LoggedInUsers { get; set; }
         MonocleConfiguration Config { get; set; }
         UnturnedService UnturnedService { get; set; }
@@ -70,7 +70,7 @@ namespace Monocle.Services
             UnturnedPlayerEvents.OnPlayerDeath += (deadPlayer, cause, limb, murdererId) =>
             {
                 var @event = EventHandlers.PlayerDeath(deadPlayer, murdererId, cause);
-                var message = CreateEvent(EventType.PlayerDeath, @event);
+                var message = new ServerMessage<PlayerDeathEvent>(ServerMessageType.OnPlayerDeath, @event);
                 BroadcastEvent(message);
             };
 
@@ -79,26 +79,26 @@ namespace Monocle.Services
                 // TODO: If message starts with /, then it's a command, but can we check if the command failed or succeeded?
 
                 var @event = EventHandlers.PlayerMessage(player, color, chatMode, message);
-                var serverMessage = CreateEvent(EventType.PlayerMessage, @event);
+                var serverMessage = new ServerMessage<PlayerMessageEvent>(ServerMessageType.OnPlayerMessage, @event);
                 BroadcastEvent(serverMessage);
             };
 
             U.Events.OnPlayerConnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                var message = CreateEvent(EventType.PlayerJoined, @event);
+                var message = new ServerMessage<PlayerJoinOrLeaveEvent>(ServerMessageType.OnPlayerJoined, @event);
                 BroadcastEvent(message);
             };
 
             U.Events.OnPlayerDisconnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                var message = CreateEvent(EventType.PlayerLeft, @event);
+                var message = new ServerMessage<PlayerJoinOrLeaveEvent>(ServerMessageType.OnPlayerLeft, @event);
                 BroadcastEvent(message);
             };
         }
 
-        void BroadcastEvent(ServerMessage<EventType, Event> message)
+        void BroadcastEvent<T>(ServerMessage<T> message)
         {
             foreach (var (socket, _) in LoggedInUsers.Values)
             {
@@ -106,9 +106,6 @@ namespace Monocle.Services
                 socket.Send(payload);
             }
         }
-
-        private ServerMessage<EventType, Event> CreateEvent(EventType type, Event data) =>
-            new(MessageKind.Event, type, data);
 
         void HandleOpen(IWebSocketConnection socket)
         {
@@ -130,26 +127,16 @@ namespace Monocle.Services
         void HandleMessage(IWebSocketConnection socket, string payload)
         {
             var isAuthenticated = LoggedInUsers.ContainsKey(socket.ConnectionInfo.Id);
-
-            var type = GetRequestType(payload);
-            if (type == null)
-            {
-                var message = new ServerMessage<ErrorType, string>(MessageKind.Error, ErrorType.InvalidRequestType, "The request type was not provided or invalid");
-                SendMessage(socket, message);
-            }
-            else if (isAuthenticated)
+            var type = GetRequestType(payload) ?? RequestType.Unknown;
+            if (isAuthenticated)
             {
                 try
                 {
-                    var response = ServeRequest(socket.ConnectionInfo.Id, type, payload);
-                    // TODO: Refactor how responses are handled
-                    if (response != null)
-                    {
-                        SendMessage(socket, response);
-                    }
-                } catch (ApiException ex)
+                    ServeRequest(socket, type, payload);
+                } catch (Exception ex)
                 {
-                    var message = new ServerMessage<ErrorType, string>(MessageKind.Error, ex.ErrorModel.Type, ex.ErrorModel.Message);
+                    Logger.Log(ex.Message);
+                    var message = BuildMessage(ServerMessageType.InternalServerError, new InternalError(ex));
                     SendMessage(socket, message);
                 }
             }
@@ -159,8 +146,8 @@ namespace Monocle.Services
                 var user = Authenticate(loginPayload);
                 if (user != null)
                 {
-                    // TODO: Refactor how responses are handled as data in the code
-                    var response = new ServerMessage<ResponseType, string>(MessageKind.Response, ResponseType.SuccessfulLogin, "Authentication succeeded");
+                    var model = new SuccesfulAuthResponse(user.Type);
+                    var response = BuildMessage(ServerMessageType.SuccessfulLogin, model);
                     SendMessage(socket, response);
                     Logger.Log($"Host {socket.ConnectionInfo.Host} logged in as {user.Username}");
                     LoggedInUsers[socket.ConnectionInfo.Id] = (socket, user);
@@ -178,7 +165,7 @@ namespace Monocle.Services
             if (LoggedInUsers.TryGetValue(socketId, out var tuple))
             {
                 var (socket, _) = tuple;
-                var message = BuildResponse(ResponseType.PlayerScreenshot, new PlayerScreenshotResponse
+                var message = BuildMessage(ServerMessageType.PlayerScreenshot, new PlayerScreenshotResponse
                 {
                     PlayerId = playerId,
                     ScreenEncoded = Convert.ToBase64String(jpg),
@@ -187,46 +174,67 @@ namespace Monocle.Services
             }
         }
 
-        ServerMessage<ResponseType, dynamic> ServeRequest(Guid socketId, RequestType? type, string payload)
+        void ServeRequest(IWebSocketConnection socket, RequestType? type, string payload)
         {
             switch (type)
             {
                 case RequestType.Players:
                     var playerModels = UnturnedService.GetPlayers();
-                    return BuildResponse(ResponseType.Players, playerModels);
+                    BuildMessageAndSend(socket, ServerMessageType.Players, playerModels);
+                    return;
                 case RequestType.Structures:
                     // Structs are floors, walls, roofs, stairs, etc
                     var structures = UnturnedService.GetStructures();
-                    return BuildResponse(ResponseType.Structures, structures);
+                    BuildMessageAndSend(socket, ServerMessageType.Structures, structures);
+                    return;
                 case RequestType.Barricades:
                     // Barricades are everything that can be stick into cars: lockers, wardrobes, metal plates, etc
                     var barricades = UnturnedService.GetBarricades();
-                    return BuildResponse(ResponseType.Barricades, barricades);
+                    BuildMessageAndSend(socket, ServerMessageType.Barricades, barricades);
+                    return;
                 case RequestType.Vehicles:
                     var vehicles = UnturnedService.GetVehicles();
-                    return BuildResponse(ResponseType.Vehicles, vehicles);
+                    BuildMessageAndSend(socket, ServerMessageType.Vehicles, vehicles);
+                    return;
                 case RequestType.ServerInfo:
                     var serverInfo = UnturnedService.GetServerInfo();
-                    return BuildResponse(ResponseType.ServerInfo, serverInfo);
+                    BuildMessageAndSend(socket, ServerMessageType.ServerInfo, serverInfo);
+                    return;
                 case RequestType.PlayerScreenshot:
-                    var message = JsonConvert.DeserializeObject<Stub>(payload);
-                    if (message?.Data != null)
+                    // TODO: Validate user permissions
+
+                    var request = DeserializeRequest<PlayerScreenshotRequest>(payload);
+                    var userId = request?.Data?.UserId;
+
+                    if (userId != null)
                     {
-                        UnturnedService.ScreenshotPlayer(message.Data, socketId, GotScreenshot);
+                        UnturnedService.ScreenshotPlayer(userId, socket.ConnectionInfo.Id, GotScreenshot);
+                    } else
+                    {
+                        // TODO: Throw error if user id does not exist in the request
+                        BuildMessageAndSend(socket, ServerMessageType.UserNotFound, new UserNotFoundError(userId!));
                     }
-                    return null;
+                    return;
+                case RequestType.Unknown:
+                    BuildMessageAndSend(socket, ServerMessageType.InvalidRequestType, "The request type was not provided or invalid");
+                    return;
                 default:
                     throw new ArgumentException("We should never get an invalid request type here");
             }
         }
 
-        private class Stub
+        private BaseRequest<T>? DeserializeRequest<T>(string payload) 
+            => JsonConvert.DeserializeObject<BaseRequest<T>>(payload);
+
+        private void BuildMessageAndSend<T>(IWebSocketConnection socket, ServerMessageType type, T data)
         {
-            public string Data { get; set; }
+            var message = BuildMessage(type, data);
+            SendMessage(socket, message);
         }
-        
-        private ServerMessage<ResponseType, dynamic> BuildResponse<T>(ResponseType type, T data) => 
-            new(MessageKind.Response, type, data!);
+
+        private ServerMessage<T> BuildMessage<T>(ServerMessageType type, T data) {
+            return new ServerMessage<T>(type, data);
+        }
 
         AuthorizedUser? Authenticate(LoginRequest? payload)
         {
@@ -243,12 +251,11 @@ namespace Monocle.Services
 
         RequestType? GetRequestType(string message)
         {
-            // All requests sent by clients must have a "type" field.
-            var baseRequest = JsonConvert.DeserializeObject<BaseRequest>(message, SerializationSettings);
+            var baseRequest = JsonConvert.DeserializeObject<BaseRequest<dynamic>>(message, SerializationSettings);
             return baseRequest?.Type;
         }
 
-        void SendMessage<T, D>(IWebSocketConnection socket, ServerMessage<T, D> response)
+        void SendMessage<T>(IWebSocketConnection socket, ServerMessage<T> response)
         {
             var serialized = JsonConvert.SerializeObject(response, SerializationSettings);
             socket.Send(serialized);

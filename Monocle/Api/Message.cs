@@ -8,27 +8,40 @@ using System.Threading.Tasks;
 
 namespace Monocle.Api
 {
-    internal class ServerMessage<T, D>
+    internal enum ServerMessageType
     {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public MessageKind Kind;
+        // Responses
+        Players,
+        SuccessfulLogin,
+        Vehicles,
+        Barricades,
+        Structures,
+        ServerInfo,
+        PlayerScreenshot,
 
-        [JsonConverter(typeof(StringEnumConverter))]
-        public T Type { get; set; }
+        // Events
+        OnPlayerDeath,
+        OnPlayerMessage,
+        OnPlayerJoined,
+        OnPlayerLeft,
+
+        // Errors
+        InvalidRequestType,
+        UserNotFound,
+        InvalidRequestData,
+        InternalServerError,
+    }
+
+    internal class ServerMessage<D>
+    {
+        public ServerMessageType Type { get; set; }
 
         public D Data { get; set; }
 
-        public ServerMessage(MessageKind kind, T type, D data)
+        public ServerMessage(ServerMessageType type, D data)
         {
-            Kind = kind;
             Type = type;
             Data = data;
         }
-    }
-
-    class PlayerScreenshotResponse
-    {
-        public string ScreenEncoded { get; set; }
-        public string PlayerId { get; set; }
     }
 }

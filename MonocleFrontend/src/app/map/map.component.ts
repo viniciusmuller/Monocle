@@ -89,7 +89,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       for (let player of this.players) {
         let playerMarker = this.createPlayerMarker(player);
         playerMarker.addTo(this.map);
-        this.playerMarkers?.push(playerMarker)
+        this.playerMarkers.push(playerMarker)
       }
     }
   }

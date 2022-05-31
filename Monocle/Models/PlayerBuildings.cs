@@ -9,6 +9,8 @@ namespace Monocle.Models
 {
     class StructureModel
     {
+        public string InstanceId { get; set; }
+        public ushort Id { get; set; }
         public string Name { get; set; }
         public float Health { get; set; }
         public Position Position { get; set; }
@@ -20,6 +22,8 @@ namespace Monocle.Models
             Name = drop.asset.name;
             Position = drop.model.position.ToPosition();
             Health = drop.asset.health;
+            InstanceId = drop.instanceID.ToString();
+            Id = drop.asset.id;
 
             var serverSideData = drop.GetServersideData();
             GroupId = serverSideData.group.ToString();
@@ -29,6 +33,8 @@ namespace Monocle.Models
 
     class BarricadeModel
     {
+        public ushort Id { get; set; }
+        public string InstanceId { get; set; }
         public string Name { get; set; }
         public float Health { get; set; }
         public Position Position { get; set; }
@@ -41,6 +47,8 @@ namespace Monocle.Models
             Name = drop.asset.name;
             Position = drop.model.position.ToPosition();
             Health = drop.asset.health;
+            InstanceId = drop.instanceID.ToString();
+            Id = drop.asset.id;
 
             var serverSideData = drop.GetServersideData();
             GroupId = serverSideData.group.ToString();

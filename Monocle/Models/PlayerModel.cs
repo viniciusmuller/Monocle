@@ -19,7 +19,7 @@ namespace Monocle.Models
         public float Rotation { get; set; }
         public EquipmentModel Equipment { get; set; }
         public int Reputation { get; set; }
-        public float? Joined { get; set; }
+        public DateTimeOffset Joined { get; set; }
         public string GroupId { get; set; }
         public List<ItemModel> Items { get; set; }
 
@@ -33,7 +33,7 @@ namespace Monocle.Models
             Health = player.player.life.health;
             Rotation = player.player.transform.rotation.eulerAngles.y;
             Equipment = new EquipmentModel(player);
-            Joined = player.joined;
+            Joined = DateTime.UtcNow; // TODO: Correctly parse date
             Reputation = player.player.skills.reputation;
             GroupId = player.player.quests.groupID.ToString();
             Items = GetItemsFromInventory(player.player.inventory);
@@ -49,7 +49,7 @@ namespace Monocle.Models
             Health = player.Health;
             Rotation = player.Rotation;
             Equipment = new EquipmentModel(player);
-            Joined = null; // TODO: Get join from UnturnedPlayer
+            Joined = DateTime.UtcNow; // TODO: Correctly parse date
             GroupId = player.SteamGroupID.ToString();
             Reputation = player.Reputation;
             Items = GetItemsFromInventory(player.Inventory);

@@ -7,52 +7,6 @@ using System.Threading.Tasks;
 
 namespace Monocle.Api
 {
-    internal enum ErrorType
-    {
-        InvalidRequestType,
-        UserNotFound,
-        InvalidRequestData,
-    }
-
-    internal enum MessageKind
-    {
-        Response,
-        Event,
-        Error
-    }
-
-    internal enum RequestType
-    {
-        Authenticate,
-        Players,
-        PlayerDetails,
-        Structures,
-        Barricades,
-        Vehicles,
-        ServerInfo,
-        PlayerScreenshot,
-    }
-
-    internal enum ResponseType
-    {
-        Players,
-        CurrentBuildings,
-        SuccessfulLogin,
-        Vehicles,
-        Barricades,
-        Structures,
-        ServerInfo,
-        PlayerScreenshot,
-    }
-
-    internal enum EventType
-    {
-        PlayerDeath,
-        PlayerMessage,
-        PlayerJoined,
-        PlayerLeft,
-    }
-
     public enum AuthorizedUserType
     {
         Observer,
@@ -61,7 +15,7 @@ namespace Monocle.Api
 
     enum ChatMode
     {
-        Global = 1,
+        Global,
         Local,
         Group,
         Say,
@@ -70,7 +24,7 @@ namespace Monocle.Api
 
     enum VehicleType
     {
-        Car = 1,
+        Car,
         Plane,
         Helicopter,
         Blimp,
@@ -80,7 +34,7 @@ namespace Monocle.Api
 
     enum ItemType
     {
-        Hat = 1,
+        Hat,
         Pants,
         Shirt,
         Mask,

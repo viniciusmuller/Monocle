@@ -33,8 +33,10 @@
 
             <div id="moderation-buttons">
                 <button mat-raised-button (click)="emitWatchPlayer()" color="primary">Screenshot</button>
-                <button mat-raised-button color="warn">Kick</button>
-                <button mat-raised-button color="warn">Ban</button>
+                <ng-container *ngIf="userCanModerate">
+                    <button mat-raised-button color="warn">Kick</button>
+                    <button mat-raised-button color="warn">Ban</button>
+                </ng-container>
             </div>
         </mat-card-content>
     </ng-container>

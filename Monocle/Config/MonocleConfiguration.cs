@@ -35,6 +35,6 @@ namespace Monocle.Config
     {
         public string? Username { get; set; }
         public string? Password { get; set; } // TODO: Maybe use password hash
-        public AuthorizedUserType? Type { get; set; }
+        public AuthorizedUserType Type { get; set; }
     }
 }

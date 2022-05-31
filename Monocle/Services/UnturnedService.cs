@@ -1,5 +1,4 @@
 ﻿using Monocle.Api;
-using Monocle.Exceptions;
 using Monocle.Models;
 using SDG.Unturned;
 using Steamworks;

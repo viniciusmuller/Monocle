@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of, timer } from 'rxjs';
 import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
-import { LoginPayload } from '../types/serverData';
+import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
 import * as _ from 'lodash';
+import { AuthorizedUserType } from '../types/enums';
+import { SuccesfulAuthenticationResponse } from '../types/responses';
 
 @Component({
   selector: 'app-server-dashboard',
@@ -18,6 +20,7 @@ export class ServerDashboardComponent implements OnInit {
   structures?: Structure[];
   vehicles?: Vehicle[];
   bases: Base[];
+  authenticationData?: SuccesfulAuthenticationResponse;
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
@@ -25,10 +28,10 @@ export class ServerDashboardComponent implements OnInit {
   selectedPlayerId?: PlayerId;
   imagePath?: string;
 
-  connectAndLogin(payload: LoginPayload) {
-    this.websocketService.connect(payload.host, payload.port, payload.ssl);
+  connectAndLogin(request: AuthenticationRequest) {
+    this.websocketService.connect(request.host, request.port, request.ssl);
     setTimeout(() => {
-      this.websocketService.login(payload.username, payload.password);
+      this.websocketService.login(request.username, request.password);
     }, 500);
   }
 
@@ -41,8 +44,9 @@ export class ServerDashboardComponent implements OnInit {
   ngOnInit(): void {
     // TODO: These should probably be inside the constructor
 
-    this.websocketService.onLoginSuccessful.subscribe(_ => {
+    this.websocketService.onLoginSuccessful.subscribe(authData => {
       this.loggedIn = true;
+      this.authenticationData = authData;
       this.bindRequests();
     })
 
@@ -68,6 +72,14 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onPlayerMessage.subscribe(playerMessage => {
       this.chatLog = [playerMessage, ...this.chatLog];
+    })
+
+    this.websocketService.internalServerError.subscribe(error => {
+      console.error(error.message, error.code, error.stackTrace);
+    })
+
+    this.websocketService.userNotFound.subscribe(error => {
+      console.error(`User with id ${error.userId} was not found`);
     })
 
     this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
@@ -210,6 +222,10 @@ export class ServerDashboardComponent implements OnInit {
 
   getSelectedPlayer(): Player | undefined {
     return this.players?.find(p => p.id == this.selectedPlayerId);
+  }
+
+  userCanModerate(): boolean {
+    return this.authenticationData?.userType == AuthorizedUserType.Administrator;
   }
 
   getPlayers() { this.websocketService.getPlayers(); }

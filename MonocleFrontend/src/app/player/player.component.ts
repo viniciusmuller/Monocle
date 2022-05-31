@@ -8,6 +8,7 @@ import { Player, PlayerId } from '../types/models';
 })
 export class PlayerComponent implements OnInit {
   @Input() player?: Player;
+  @Input() userCanModerate?: boolean;
   @Output() onWatchRequest = new EventEmitter<PlayerId>();
 
   constructor() { }

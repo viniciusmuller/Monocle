@@ -9,3 +9,5 @@
 - Add more sprites (player wielding raid gear, different base tiers, other vehicles)
 - Display players join date in humanized time ("10 minutes ago")
 - Group players in players list by their own in-game group
+- Select entities on hover
+- Improve framerate (fetch players and cars every 500ms)
