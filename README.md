@@ -12,3 +12,5 @@
 - Select entities on hover
 - Improve framerate (fetch players and cars every 500ms)
 - Refactor websocket service
+- Add art files to the project's repository
+- Add github action to create release on tags
