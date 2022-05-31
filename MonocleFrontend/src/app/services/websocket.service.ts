@@ -70,7 +70,6 @@ export class WebsocketService {
         return this.onGetServerInfo.next(message.data as ServerInfo);
 
       case ServerMessageType.PlayerScreenshot:
-        console.log(message);
         return this.onGetPlayerScreenshot.next(message.data as PlayerScreenshotResponse);
 
       // Events

@@ -11,3 +11,4 @@
 - Group players in players list by their own in-game group
 - Select entities on hover
 - Improve framerate (fetch players and cars every 500ms)
+- Refactor websocket service

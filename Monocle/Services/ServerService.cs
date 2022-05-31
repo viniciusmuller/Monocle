@@ -70,7 +70,7 @@ namespace Monocle.Services
             UnturnedPlayerEvents.OnPlayerDeath += (deadPlayer, cause, limb, murdererId) =>
             {
                 var @event = EventHandlers.PlayerDeath(deadPlayer, murdererId, cause);
-                var message = new ServerMessage<PlayerDeathEvent>(ServerMessageType.OnPlayerDeath, @event);
+                var message = BuildMessage(ServerMessageType.OnPlayerDeath, @event);
                 BroadcastEvent(message);
             };
 
@@ -79,21 +79,21 @@ namespace Monocle.Services
                 // TODO: If message starts with /, then it's a command, but can we check if the command failed or succeeded?
 
                 var @event = EventHandlers.PlayerMessage(player, color, chatMode, message);
-                var serverMessage = new ServerMessage<PlayerMessageEvent>(ServerMessageType.OnPlayerMessage, @event);
+                var serverMessage = BuildMessage(ServerMessageType.OnPlayerMessage, @event);
                 BroadcastEvent(serverMessage);
             };
 
             U.Events.OnPlayerConnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                var message = new ServerMessage<PlayerJoinOrLeaveEvent>(ServerMessageType.OnPlayerJoined, @event);
+                var message = BuildMessage(ServerMessageType.OnPlayerJoined, @event);
                 BroadcastEvent(message);
             };
 
             U.Events.OnPlayerDisconnected += (player) =>
             {
                 var @event = EventHandlers.PlayerJoinedOrLeft(player);
-                var message = new ServerMessage<PlayerJoinOrLeaveEvent>(ServerMessageType.OnPlayerLeft, @event);
+                var message = BuildMessage(ServerMessageType.OnPlayerLeft, @event);
                 BroadcastEvent(message);
             };
         }
