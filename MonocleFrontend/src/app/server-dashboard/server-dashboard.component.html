@@ -3,10 +3,32 @@
         <!-- TODO: Make these all columns the same height -->
         <div class="row">
             <div class="col-md">
-                <app-map (onPlayerSelected)="playerSelected($event)" [serverInfo]="serverInfo" [bases]="bases" [vehicles]="vehicles" [players]="players"></app-map>
+                <app-map 
+                    (onPlayerSelected)="playerSelected($event)" 
+                    (onVehicleSelected)="vehicleSelected($event)" 
+                    (onBaseSelected)="baseSelected($event)" 
+                    [serverInfo]="serverInfo" [bases]="bases" [vehicles]="vehicles" [players]="players">
+                </app-map>
             </div>
             <div class="col-md">
-                <app-player (onWatchRequest)="watchPlayer($event)" [userCanModerate]="userCanModerate()" [player]="getSelectedPlayer()"></app-player>
+                <ng-container *ngIf="selectedEntity; else noSelectedEntity">
+                    <div [ngSwitch]="selectedEntity.type">
+                        <div *ngSwitchCase="selectedEntityType.Player">
+                            <app-player
+                                (onWatchRequest)="watchPlayer($event)" 
+                                [userCanModerate]="userCanModerate()" 
+                                [player]="getSelectedPlayer()">
+                            </app-player>
+                        </div>
+                        <div *ngSwitchCase="selectedEntityType.Vehicle">
+                            <app-vehicle [userCanModerate]="userCanModerate()" [vehicle]="getSelectedVehicle()"></app-vehicle>
+                        </div>
+                        <div *ngSwitchCase="selectedEntityType.Base">
+                            <!-- TODO: Don't call getSelectedBase more than once -->
+                            <app-base [base]="getSelectedBase()" [barricades]="getSelectedBase()?.barricades" [structures]="getSelectedBase()?.structures"></app-base>
+                        </div>
+                    </div>
+                </ng-container>
             </div>
             <div class="col-md">
                 <app-server-details [serverInfo]="serverInfo" [totalPlayers]="players?.length ?? 0"></app-server-details>
@@ -43,4 +65,11 @@
         <h1>Please connect to a Monocle server.</h1>
         <app-login-component (onSubmit)="connectAndLogin($event)"></app-login-component>
     </div>
+</ng-template>
+
+<ng-template #noSelectedEntity>
+    <mat-card>
+        <mat-card-title>No entity selected</mat-card-title>
+        <p>Click an icon in the map and start exploring</p>
+    </mat-card>
 </ng-template>

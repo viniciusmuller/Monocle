@@ -23,7 +23,11 @@ import { PlayerEquipmentComponent } from './player-equipment/player-equipment.co
 import { MapComponent } from './map/map.component'; 
 import {MatListModule} from '@angular/material/list'; 
 import {MatCardModule} from '@angular/material/card'; 
-import {MatCheckboxModule} from '@angular/material/checkbox'; 
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import { VehicleComponent } from './vehicle/vehicle.component';
+import { BaseComponent } from './base/base.component';
+import { BarricadeComponent } from './barricade/barricade.component';
+import { StructureComponent } from './structure/structure.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +42,11 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     PlayerInventoryComponent,
     ItemComponent,
     PlayerEquipmentComponent,
-    MapComponent
+    MapComponent,
+    VehicleComponent,
+    BaseComponent,
+    BarricadeComponent,
+    StructureComponent,
   ],
   imports: [
     BrowserModule,

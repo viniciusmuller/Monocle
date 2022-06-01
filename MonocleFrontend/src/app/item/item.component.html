@@ -1,7 +1,7 @@
 <mat-expansion-panel>
     <mat-expansion-panel-header>
         <mat-panel-title>
-            {{item.name}}
+            <div class="dot {{getCssClassFromItemRarity(item.rarity)}}"></div> {{item.name}}
         </mat-panel-title>
         <mat-panel-description *ngIf="description; else amountDescription">
             {{description}}
@@ -12,6 +12,9 @@
     <p>Amount: {{item.amount}}</p>
     <p>Durability: {{item.durability}}%</p>
     <p>Id: {{item.id}}</p>
+
+    <!-- TODO: Implement add deletion -->
+    <button mat-raised-button color="warn">Remove</button>
 </mat-expansion-panel>
 
 <ng-template #amountDescription>

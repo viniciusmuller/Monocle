@@ -5,7 +5,6 @@
 - Add other administrative functions
 - Use MessagePack as the serialization protocol
 - Display server time and weather in server details
-- Add ability to select and browse vehicles and bases
 - Add more sprites (player wielding raid gear, different base tiers, other vehicles)
 - Display players join date in humanized time ("10 minutes ago")
 - Group players in players list by their own in-game group
@@ -14,3 +13,6 @@
 - Refactor websocket service
 - Add art files to the project's repository
 - Add github action to create release on tags
+- Add button to delete items
+- Add button to clear player inventory
+- Add button to add item to player

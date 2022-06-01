@@ -18,6 +18,10 @@ export class PlayerComponent implements OnInit {
     return Math.round(number)
   }
 
+  getTotalEquippedItems(player: Player): number {
+    return Object.values(player.equipment).reduce((acc, item) => acc + (item ? 1 : 0), 0)
+  }
+
   emitWatchPlayer() {
     if (this.player) {
       this.onWatchRequest.emit(this.player.id);

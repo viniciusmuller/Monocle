@@ -1,0 +1,51 @@
+<mat-card *ngIf="base; else noBase">
+    <mat-card-title>Base</mat-card-title>
+
+    <mat-card-subtitle>
+        {{base.groupId}}
+    </mat-card-subtitle>
+
+    <mat-card-content>
+        <p>Position: ({{round(base.position.x)}}, {{round(base.position.y)}}, {{round(base.position.z)}})</p>
+    </mat-card-content>
+
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Barricades
+            </mat-panel-title>
+
+            <mat-panel-description>
+                {{barricades?.length}} items
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <ng-container *ngIf="barricades && barricades.length > 0">
+            <ng-container *ngFor="let barricade of barricades; trackBy: trackBarricade">
+                <app-barricade [barricade]="barricade"></app-barricade>
+            </ng-container>
+        </ng-container>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Structures
+            </mat-panel-title>
+
+            <mat-panel-description>
+                {{structures?.length}} items
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <ng-container *ngIf="structures && structures.length > 0">
+            <ng-container *ngFor="let structure of structures; trackBy: trackStructure">
+                <app-structure [structure]="structure"></app-structure>
+            </ng-container>
+        </ng-container>
+    </mat-expansion-panel>
+</mat-card>
+
+<ng-template #noBase>
+    <p>Base not found</p>
+</ng-template>

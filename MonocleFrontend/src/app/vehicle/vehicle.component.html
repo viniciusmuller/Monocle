@@ -1,0 +1,26 @@
+<mat-card *ngIf="vehicle; else noVehicle">
+    <mat-card-title>Vehicle</mat-card-title>
+
+    <mat-card-subtitle>
+        {{vehicle.name}}
+    </mat-card-subtitle>
+
+    <mat-card-content>
+        <p>HP: {{vehicle.health}}</p>
+        <p>Fuel: {{vehicle.fuel}}</p>
+        <p>Battery: {{vehicle.battery}}</p>
+        <p>{{vehicle.isLocked ? "Locked" : "Unlocked"}}</p>
+        <p *ngIf="vehicle.isLocked">Owner Id: {{vehicle.ownerId}}</p>
+        <p>Position: ({{round(vehicle.position.x)}}, {{round(vehicle.position.y)}}, {{round(vehicle.position.z)}})</p>
+
+        <div id="moderation-buttons">
+            <ng-container *ngIf="userCanModerate">
+                <button mat-raised-button (click)="emitDestroy()" color="warn">Destroy</button>
+            </ng-container>
+        </div>
+    </mat-card-content>
+</mat-card>
+
+<ng-template #noVehicle>
+    <p>Vehicle not found</p>
+</ng-template>

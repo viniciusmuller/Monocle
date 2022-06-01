@@ -1,0 +1,32 @@
+<mat-expansion-panel *ngIf="barricade; else noBarricade">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            {{barricade.name}}
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <p>HP: {{barricade.health}}</p>
+    <p>ID: {{barricade.id}}</p>
+    <p>Position: ({{round(barricade.position.x)}}, {{round(barricade.position.y)}}, {{round(barricade.position.z)}})</p>
+
+    <div *ngIf="barricade.items">
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Items
+                </mat-panel-title>
+
+                <mat-panel-title>
+                    {{barricade.items.length}} items
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <app-player-inventory [items]="barricade.items"></app-player-inventory>
+        </mat-expansion-panel>
+
+    </div>
+</mat-expansion-panel>
+
+<ng-template #noBarricade>
+    <p>Barricade is not defined</p>
+</ng-template>

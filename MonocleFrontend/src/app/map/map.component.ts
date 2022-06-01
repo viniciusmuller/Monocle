@@ -15,6 +15,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Input() bases?: Base[];
   @Input() serverInfo?: ServerInfo;
   @Output() onPlayerSelected = new EventEmitter<PlayerId>();
+  @Output() onVehicleSelected = new EventEmitter<string>();
+  @Output() onBaseSelected = new EventEmitter<string>();
 
   private map!: L.Map;
   private playerMarkers: L.Marker[];
@@ -176,7 +178,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
 
     let marker = this.createMarker(base.position, playerIcon);
-    let onClick = () => console.log(base);
+    let onClick = () => this.onBaseSelected.emit(base.groupId);
     return marker.on('click', onClick);
   }
 
@@ -191,7 +193,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
 
     let marker = this.createMarker(vehicle.position, playerIcon);
-    let onClick = () => console.log(vehicle);
+    let onClick = () => this.onVehicleSelected.emit(vehicle.instanceId);
     return marker.on('click', onClick);
   }
 

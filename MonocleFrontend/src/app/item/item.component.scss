@@ -1,0 +1,33 @@
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+// Colors taken from https://unturned.fandom.com/wiki/Rarity
+
+.common {
+    background-color: #fff;
+    border: 1px solid rgb(170, 170, 170)
+}
+
+.uncommon {
+    background-color: #1f871f;
+}
+
+.rare {
+    background-color: #4b64fa;
+}
+
+.epic {
+    background-color: #964bfa;
+}
+
+.legendary {
+    background-color: #c832fa;
+}
+
+.mythical {
+    background-color: #fa3219;
+}

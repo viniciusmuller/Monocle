@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of, timer } from 'rxjs';
-import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, ServerInfo, Structure, Vehicle } from '../types/models';
+import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
 import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
 import * as _ from 'lodash';
@@ -24,8 +24,8 @@ export class ServerDashboardComponent implements OnInit {
   serverInfo?: ServerInfo;
   chatLog: PlayerMessage[];
   eventLog: MonocleEvent[];
-  // TODO: Support selecting vehicles and bases
-  selectedPlayerId?: PlayerId;
+  selectedEntity?: SelectedEntity<PlayerId | string>;
+  selectedEntityType = SelectedEntityType; // used in ngSwitch
   imagePath?: string;
 
   connectAndLogin(request: AuthenticationRequest) {
@@ -216,12 +216,40 @@ export class ServerDashboardComponent implements OnInit {
     return { time, message }
   }
 
+  vehicleSelected(id: string) {
+    this.selectedEntity = { type: SelectedEntityType.Vehicle, id }
+  }
+
+  baseSelected(id: string) {
+    this.selectedEntity = { type: SelectedEntityType.Base, id }
+  }
+
   playerSelected(id: PlayerId) {
-    this.selectedPlayerId = id;
+    this.selectedEntity = { type: SelectedEntityType.Player, id }
   }
 
   getSelectedPlayer(): Player | undefined {
-    return this.players?.find(p => p.id == this.selectedPlayerId);
+    if (this.selectedEntity?.type == SelectedEntityType.Player) {
+      let id = this.selectedEntity.id;
+      return this.players?.find(p => p.id == id);
+    }
+    return;
+  }
+
+  getSelectedBase(): Base | undefined {
+    if (this.selectedEntity?.type == SelectedEntityType.Base) {
+      let id = this.selectedEntity.id;
+      return this.bases?.find(p => p.groupId == id);
+    }
+    return;
+  }
+
+  getSelectedVehicle(): Vehicle | undefined {
+    if (this.selectedEntity?.type == SelectedEntityType.Vehicle) {
+      let id = this.selectedEntity.id;
+      return this.vehicles?.find(p => p.instanceId == id);
+    }
+    return;
   }
 
   userCanModerate(): boolean {

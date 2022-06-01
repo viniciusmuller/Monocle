@@ -1,0 +1,15 @@
+<mat-expansion-panel *ngIf="structure; else noBarricade">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            {{structure.name}}
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <p>HP: {{structure.health}}</p>
+    <p>ID: {{structure.id}}</p>
+    <p>Position: ({{round(structure.position.x)}}, {{round(structure.position.y)}}, {{round(structure.position.z)}})</p>
+</mat-expansion-panel>
+
+<ng-template #noBarricade>
+    <p>Barricade is not defined</p>
+</ng-template>

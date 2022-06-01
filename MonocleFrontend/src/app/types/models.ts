@@ -29,6 +29,17 @@ export interface Equipment {
     secondary?: Item;
 }
 
+export enum SelectedEntityType {
+    Base,
+    Vehicle,
+    Player
+}
+
+export interface SelectedEntity<T> {
+    type: SelectedEntityType,
+    id: T;
+}
+
 export interface Player {
     id: PlayerId;
     name: string;
