@@ -149,6 +149,7 @@ export class ServerDashboardComponent implements OnInit {
     serverDetailsFetchInterval.subscribe(() => this.getServerDetails())
   }
 
+  // Move this to its own context
   findBases() {
     if (this.barricades && this.structures) {
       let groupedBarricades = _.groupBy(this.barricades, ({ groupId }) => groupId);
@@ -181,7 +182,7 @@ export class ServerDashboardComponent implements OnInit {
       }
 
       for (let [groupId, structures] of Object.entries(groupedStructures)) {
-        if (structures.length < 5) {
+        if (structures.length < 8) {
           continue;
         }
 

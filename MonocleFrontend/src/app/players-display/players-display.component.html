@@ -3,8 +3,11 @@
 
     <ng-container *ngIf="players; else loading">
         <ng-container *ngIf="players.length > 0; else noPlayers">
-            <mat-action-list *ngFor="let player of players; trackBy: trackPlayer">
-                <button mat-list-item (click)="playerSelected(player)">{{player.name}}</button>
+            <mat-action-list *ngFor="let grouping of (groupPlayersByGroup(players) | keyvalue)">
+                <h2>{{grouping.key != "0" ? "Group " + grouping.key : "No group"}}</h2>
+                <ng-container *ngFor="let player of grouping.value">
+                    <button mat-list-item (click)="playerSelected(player)">{{player.name}}</button>
+                </ng-container>
             </mat-action-list>
         </ng-container>
     </ng-container>

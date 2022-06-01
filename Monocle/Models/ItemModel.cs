@@ -34,6 +34,7 @@ namespace Monocle.Models
             Durability = durability ?? 100;
             Id = item.id;
             Type = (ItemType)item.type;
+            Rarity = (ItemRarity)item.rarity;
         }
     }
 }

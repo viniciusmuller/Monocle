@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import * as _ from 'lodash';
 import { Player, PlayerId } from '../types/models';
 
 @Component({
@@ -14,11 +15,11 @@ export class PlayersDisplayComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  playerSelected(player: Player) {
-    this.onPlayerSelected.emit(player.id);
+  groupPlayersByGroup(players: Player[]) {
+    return _.groupBy(players, p => p.groupId);
   }
 
-  trackPlayer(_index: number, player: Player) {
-    return player.id;
+  playerSelected(player: Player) {
+    this.onPlayerSelected.emit(player.id);
   }
 }
