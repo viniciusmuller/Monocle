@@ -46,16 +46,6 @@
             </div>
         </div>
         <div class="row">
-            <!-- TODO: This should be screenshot-component -->
-            <div class="col-md d-flex flex-column" style="max-width: 640px; max-height: 480px;">
-                <ng-container *ngIf="imagePath">
-                    <div class="d-flex">
-                        <button mat-raised-button color="primary" (click)="clearImage()">Clear image</button>
-                        <button mat-raised-button color="primary">Screenshot</button>
-                    </div>
-                    <img [src]="imagePath">
-                </ng-container>
-            </div>
         </div>
     </div>
 </div>

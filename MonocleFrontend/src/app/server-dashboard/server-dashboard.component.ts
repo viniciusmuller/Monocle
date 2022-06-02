@@ -6,6 +6,8 @@ import { WebsocketService } from '../services/websocket.service';
 import * as _ from 'lodash';
 import { AuthorizedUserType } from '../types/enums';
 import { SuccesfulAuthenticationResponse } from '../types/responses';
+import { ScreenshotDialogComponent } from '../screenshot-dialog/screenshot-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-server-dashboard',
@@ -26,7 +28,6 @@ export class ServerDashboardComponent implements OnInit {
   eventLog: MonocleEvent[];
   selectedEntity?: SelectedEntity<PlayerId | string>;
   selectedEntityType = SelectedEntityType; // used in ngSwitch
-  imagePath?: string;
 
   connectAndLogin(request: AuthenticationRequest) {
     this.websocketService.connect(request.host, request.port, request.ssl);
@@ -35,7 +36,8 @@ export class ServerDashboardComponent implements OnInit {
     }, 500);
   }
 
-  constructor(private websocketService: WebsocketService) {
+  constructor(private websocketService: WebsocketService, 
+              private screenshotDialog: MatDialog) {
     this.chatLog = [];
     this.eventLog = [];
     this.bases = [];
@@ -83,7 +85,12 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
-      this.imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
+      let imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
+      let dialogRef = this.screenshotDialog.open(ScreenshotDialogComponent, {
+        width: '700px',
+        height: '580px',
+        data: { imagePath }
+      });
     })
 
     this.websocketService.onPlayerLeft.subscribe(leftEvent => {
@@ -113,10 +120,6 @@ export class ServerDashboardComponent implements OnInit {
 
   watchPlayer(id: PlayerId) {
     this.getPlayerScreenshot(id);
-  }
-
-  clearImage() {
-    this.imagePath = undefined;
   }
 
   bindRequests() {

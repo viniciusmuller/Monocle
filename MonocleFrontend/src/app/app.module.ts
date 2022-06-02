@@ -23,11 +23,13 @@ import { PlayerEquipmentComponent } from './player-equipment/player-equipment.co
 import { MapComponent } from './map/map.component'; 
 import {MatListModule} from '@angular/material/list'; 
 import {MatCardModule} from '@angular/material/card'; 
+import {MatDialogModule} from '@angular/material/dialog'; 
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { VehicleComponent } from './vehicle/vehicle.component';
 import { BaseComponent } from './base/base.component';
 import { BarricadeComponent } from './barricade/barricade.component';
 import { StructureComponent } from './structure/structure.component';
+import { ScreenshotDialogComponent } from './screenshot-dialog/screenshot-dialog.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +49,7 @@ import { StructureComponent } from './structure/structure.component';
     BaseComponent,
     BarricadeComponent,
     StructureComponent,
+    ScreenshotDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,7 +63,8 @@ import { StructureComponent } from './structure/structure.component';
     MatExpansionModule,
     MatListModule,
     MatCardModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]
