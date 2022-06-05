@@ -1,8 +1,12 @@
 <mat-card *ngIf="base; else noBase">
     <mat-card-title>Base</mat-card-title>
 
-    <mat-card-subtitle>
-        {{base.groupId}}
+    <mat-card-subtitle *ngIf="base.ownerId">
+        Owner: {{base.ownerId}}
+    </mat-card-subtitle>
+
+    <mat-card-subtitle *ngIf="base.groupId">
+        Group: {{base.groupId}}
     </mat-card-subtitle>
 
     <mat-card-content>

@@ -178,7 +178,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
 
     let marker = this.createMarker(base.position, playerIcon);
-    let onClick = () => this.onBaseSelected.emit(base.groupId);
+    let onClick = () => this.onBaseSelected.emit(base.trackId);
     return marker.on('click', onClick);
   }
 

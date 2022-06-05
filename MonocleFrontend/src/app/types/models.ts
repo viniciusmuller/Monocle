@@ -55,7 +55,7 @@ export interface Player {
     items: Item[];
 }
 
-interface Building {
+export interface Structure {
     id: number;
     name: string;
     health: number;
@@ -65,16 +65,24 @@ interface Building {
     instanceId: string;
 }
 
-export interface Structure extends Building { }
-export interface Barricade extends Building {
+export interface Barricade {
+    id: number;
+    name: string;
+    health: number;
+    position: Position;
+    groupId: string;
+    ownerId: PlayerId;
+    instanceId: string;
     items?: Item[];
 }
 
 export interface Base {
-    groupId: string;
+    groupId?: string;
+    ownerId?: string; // Solo player
     structures: Structure[];
     barricades: Barricade[];
     position: Position;
+    trackId: string; // Used internally in the frontend
 }
 
 export interface Vehicle {

@@ -3,11 +3,11 @@ import { interval, Observable, of, timer } from 'rxjs';
 import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
 import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
-import * as _ from 'lodash';
 import { AuthorizedUserType } from '../types/enums';
 import { SuccesfulAuthenticationResponse } from '../types/responses';
 import { ScreenshotDialogComponent } from '../screenshot-dialog/screenshot-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import * as uuid from 'uuid';
 
 @Component({
   selector: 'app-server-dashboard',
@@ -28,6 +28,8 @@ export class ServerDashboardComponent implements OnInit {
   eventLog: MonocleEvent[];
   selectedEntity?: SelectedEntity<PlayerId | string>;
   selectedEntityType = SelectedEntityType; // used in ngSwitch
+
+  noGroupId: string = '0';
 
   connectAndLogin(request: AuthenticationRequest) {
     this.websocketService.connect(request.host, request.port, request.ssl);
@@ -85,7 +87,7 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
-      let imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
+      const imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
       let dialogRef = this.screenshotDialog.open(ScreenshotDialogComponent, {
         width: '700px',
         height: '580px',
@@ -94,14 +96,14 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.onPlayerLeft.subscribe(leftEvent => {
-      let message = `${leftEvent.player.name} left`;
-      let event = this.buildEvent(leftEvent.time, message);
+      const message = `${leftEvent.player.name} left`;
+      const event = this.buildEvent(leftEvent.time, message);
       this.eventLog = [event, ...this.eventLog];
     })
 
     this.websocketService.onPlayerJoin.subscribe(joinEvent => {
-      let message = `${joinEvent.player.name} joined`;
-      let event = this.buildEvent(joinEvent.time, message);
+      const message = `${joinEvent.player.name} joined`;
+      const event = this.buildEvent(joinEvent.time, message);
       this.eventLog = [event, ...this.eventLog];
     })
 
@@ -113,7 +115,7 @@ export class ServerDashboardComponent implements OnInit {
         message = `${deathEvent.killer.name} killed ${deathEvent.dead.name} - [${deathEvent.cause}]`
       }
 
-      let event = this.buildEvent(deathEvent.time, message);
+      const event = this.buildEvent(deathEvent.time, message);
       this.eventLog = [event, ...this.eventLog];
     })
   }
@@ -154,66 +156,152 @@ export class ServerDashboardComponent implements OnInit {
 
   // Move this to its own context
   findBases() {
+    const minDistanceBetweenBases = 35;
+    this.bases = [];
+
     if (this.barricades && this.structures) {
-      let groupedBarricades = _.groupBy(this.barricades, ({ groupId }) => groupId);
-      let groupedStructures = _.groupBy(this.structures, ({ groupId }) => groupId);
+      const buildingsGroupedByGroup = this.groupBuildingsByGroup(this.barricades, this.structures);
+      const basesPerGroup = this.groupGroupsBuildings(buildingsGroupedByGroup, minDistanceBetweenBases);
 
-      let bases: { [key: string]: Base } = {};
-      let baseBarricades: { [key: string]: number } = {};
-
-      for (let [groupId, barricades] of Object.entries(groupedBarricades)) {
-        if (groupId == '0' || barricades.length < 4) {
-          continue;
+      for (const [_groupId, groupBases] of basesPerGroup) {
+        for (const base of groupBases) {
+          console.log(base);
+          if (this.isValidBase(base)) {
+            this.bases.push(base);
+          }
         }
-
-        bases[groupId] = {
-          groupId,
-          barricades,
-          position: { x: 0, y: 0, z: 0 },
-          structures: [],
-        };
-
-        for (let barricade of barricades) {
-          let pos = barricade.position;
-          var base = bases[groupId];
-          base.position.x += pos.x;
-          base.position.y += pos.y;
-          base.position.z += pos.z;
-        }
-
-        baseBarricades[groupId] = barricades.length;
-      }
-
-      for (let [groupId, structures] of Object.entries(groupedStructures)) {
-        if (structures.length < 8) {
-          continue;
-        }
-
-        var base = bases[groupId];
-
-        if (!base) {
-          // Ignore groups that only put structres
-          continue;
-        }
-
-        for (let structure of structures) {
-          let pos = structure.position;
-
-          base.position.x += pos.x;
-          base.position.y += pos.y;
-          base.position.z += pos.z;
-        }
-
-        let totalStructuresAndBarricades = baseBarricades[groupId];
-        totalStructuresAndBarricades += structures.length;
-        base.structures = structures;
-        base.position.x /= totalStructuresAndBarricades;
-        base.position.y /= totalStructuresAndBarricades;
-        base.position.z /= totalStructuresAndBarricades;
-      }
-
-      this.bases = Object.values(bases);
+      };
     }
+  }
+
+  isValidBase(base: Base): boolean { // TODO: Return enum to represent base state -> raided, ok, invalid
+    return base.barricades.length >= 2 && base.structures.length >= 8;
+  }
+
+  groupBuildingsByGroup(barricades: Barricade[], structures: Structure[]): Base[] {
+    let bases: any = {}; // [key: string]: Base[]// TODO: Type
+
+    for (const barricade of barricades) {
+      let base = bases[barricade.groupId];
+
+      if (!base) {
+        base = {};
+        bases[barricade.groupId] = base;
+        base.barricades = [];
+        base.structures = [];
+        base.groupId = barricade.groupId;
+      } 
+
+      base.barricades.push(barricade);
+    }
+
+    for (const structure of structures) {
+      let base = bases[structure.groupId];
+
+      if (!base) {
+        base = {};
+        bases[structure.groupId] = base;
+        base.structures = [];
+        base.barricades = [];
+        base.groupId = structure.groupId;
+      } 
+
+      base.structures.push(structure);
+    }
+
+    return Object.values(bases);
+  }
+
+  groupGroupsBuildings(bases: Base[], minDistanceBetweenBases: number): Map<string, IterableIterator<Base>> {
+    const resultingBases: Map<string, IterableIterator<Base>> = new Map();
+
+    for (const base of bases) {
+      let basesBounds: Map<Bounds, Base> = new Map();
+
+      for (let structure of base.structures) {
+        const point = {x: structure.position.z, y: structure.position.x };
+
+        let isWithinKnownBounds = false;
+        let currentBound: Bounds;
+        for (let bound of basesBounds.keys()) {
+          if (this.withinBounds(point, bound)) {
+            isWithinKnownBounds = true;
+            currentBound = bound;
+          }
+        }
+
+        if (isWithinKnownBounds) {
+          let base = basesBounds.get(currentBound!);
+          base?.structures.push(structure);
+        } else {
+          let bound = {
+            topRightX: point.x + minDistanceBetweenBases,
+            topRightY: point.y + minDistanceBetweenBases,
+            bottomLeftX: point.x - minDistanceBetweenBases,
+            bottomLeftY: point.y - minDistanceBetweenBases,
+          };
+          let base: Base = {
+            position: {
+              x: (bound.topRightY + bound.bottomLeftY) / 2,
+              z: (bound.topRightX + bound.bottomLeftX) / 2, 
+              y: structure.position.y
+            },
+            structures: [structure],
+            barricades: [],
+            trackId: uuid.v4()
+          }
+          basesBounds.set(bound, base)
+          if (structure.groupId == this.noGroupId) {
+            base.ownerId = structure.ownerId;
+          } else {
+            base.groupId = structure.groupId;
+          }
+        }
+      }
+
+      for (let barricade of base.barricades) {
+        const point = {x: barricade.position.z, y: barricade.position.x };
+
+        let isWithinKnownBounds = false;
+        let currentBound: Bounds;
+        for (let bound of basesBounds.keys()) {
+          if (this.withinBounds(point, bound)) {
+            isWithinKnownBounds = true;
+            currentBound = bound;
+          }
+        }
+
+        if (isWithinKnownBounds) {
+          let base = basesBounds.get(currentBound!);
+          base?.barricades.push(barricade);
+        } 
+        
+        // TODO: For now we don't consider anything that has no barricades to be a base
+        // else {
+        //   let bound = {
+        //     topRightX: point.x + minDistanceBetweenBases,
+        //     topRightY: point.y + minDistanceBetweenBases,
+        //     bottomLeftX: point.x - minDistanceBetweenBases,
+        //     bottomLeftY: point.y - minDistanceBetweenBases,
+        //   };
+        //   basesBounds.set(bound, {
+        //     groupId: barricade.groupId,
+        //     position: barricade.position,
+        //     barricades: [barricade],
+        //     structures: []
+        //   })
+        // }
+      }
+
+      resultingBases.set(base.groupId!, basesBounds.values());
+    }
+
+    return resultingBases;
+  }
+
+  withinBounds(point: Point, bounds: Bounds) {
+    return (point.x > bounds.bottomLeftX && point.x < bounds.topRightX && 
+            point.y > bounds.bottomLeftY && point.y < bounds.topRightY);
   }
 
   buildEvent(time: Date, message: string): MonocleEvent {
@@ -234,7 +322,7 @@ export class ServerDashboardComponent implements OnInit {
 
   getSelectedPlayer(): Player | undefined {
     if (this.selectedEntity?.type == SelectedEntityType.Player) {
-      let id = this.selectedEntity.id;
+      const id = this.selectedEntity.id;
       return this.players?.find(p => p.id == id);
     }
     return;
@@ -242,15 +330,15 @@ export class ServerDashboardComponent implements OnInit {
 
   getSelectedBase(): Base | undefined {
     if (this.selectedEntity?.type == SelectedEntityType.Base) {
-      let id = this.selectedEntity.id;
-      return this.bases?.find(p => p.groupId == id);
+      const id = this.selectedEntity.id;
+      return this.bases?.find(p => p.trackId == id);
     }
     return;
   }
 
   getSelectedVehicle(): Vehicle | undefined {
     if (this.selectedEntity?.type == SelectedEntityType.Vehicle) {
-      let id = this.selectedEntity.id;
+      const id = this.selectedEntity.id;
       return this.vehicles?.find(p => p.instanceId == id);
     }
     return;
@@ -266,4 +354,16 @@ export class ServerDashboardComponent implements OnInit {
   getStructures() { this.websocketService.getStructures(); }
   getBarricades() { this.websocketService.getBarricades(); }
   getServerDetails() { this.websocketService.getServerDetails(); }
+}
+
+interface Bounds {
+  topRightX: number,
+  topRightY: number,
+  bottomLeftX: number,
+  bottomLeftY: number,
+}
+
+interface Point {
+  x: number,
+  y: number,
 }
