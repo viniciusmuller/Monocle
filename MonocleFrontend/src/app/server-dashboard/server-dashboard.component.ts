@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, Observable, of, timer } from 'rxjs';
-import { Barricade, Base, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
+import { Barricade, Base, BaseType, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
 import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
 import { AuthorizedUserType } from '../types/enums';
@@ -165,8 +165,9 @@ export class ServerDashboardComponent implements OnInit {
 
       for (const [_groupId, groupBases] of basesPerGroup) {
         for (const base of groupBases) {
-          console.log(base);
-          if (this.isValidBase(base)) {
+          const baseType = this.getBaseType(base);
+          if (baseType != BaseType.Invalid) {
+            base.type = baseType;
             this.bases.push(base);
           }
         }
@@ -174,11 +175,19 @@ export class ServerDashboardComponent implements OnInit {
     }
   }
 
-  isValidBase(base: Base): boolean { // TODO: Return enum to represent base state -> raided, ok, invalid
-    return base.barricades.length >= 2 && base.structures.length >= 8;
+  getBaseType(base: Base): BaseType {
+    if (base.barricades.length <= 2 || base.structures.length <= 8) {
+      return BaseType.Invalid;
+    } else if (base.barricades.length <= 10 && base.structures.length <= 25) {
+      return BaseType.Small;
+    } else {
+      return BaseType.Large;
+    }
+    // TODO: Check if the base is raided
   }
 
   groupBuildingsByGroup(barricades: Barricade[], structures: Structure[]): Base[] {
+    // TODO: Refactor
     let bases: any = {}; // [key: string]: Base[]// TODO: Type
 
     for (const barricade of barricades) {
@@ -275,22 +284,6 @@ export class ServerDashboardComponent implements OnInit {
           let base = basesBounds.get(currentBound!);
           base?.barricades.push(barricade);
         } 
-        
-        // TODO: For now we don't consider anything that has no barricades to be a base
-        // else {
-        //   let bound = {
-        //     topRightX: point.x + minDistanceBetweenBases,
-        //     topRightY: point.y + minDistanceBetweenBases,
-        //     bottomLeftX: point.x - minDistanceBetweenBases,
-        //     bottomLeftY: point.y - minDistanceBetweenBases,
-        //   };
-        //   basesBounds.set(bound, {
-        //     groupId: barricade.groupId,
-        //     position: barricade.position,
-        //     barricades: [barricade],
-        //     structures: []
-        //   })
-        // }
       }
 
       resultingBases.set(base.groupId!, basesBounds.values());

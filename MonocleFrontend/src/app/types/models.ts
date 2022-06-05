@@ -82,7 +82,15 @@ export interface Base {
     structures: Structure[];
     barricades: Barricade[];
     position: Position;
+    type?: BaseType;
     trackId: string; // Used internally in the frontend
+}
+
+export enum BaseType {
+    Invalid,
+    Small,
+    Large,
+    Raided,
 }
 
 export interface Vehicle {

@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { interval, tap } from 'rxjs';
-import { Base, Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
+import { VehicleType } from '../types/enums';
+import { Base, BaseType, Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
 
 
 @Component({
@@ -168,8 +169,10 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   createBaseMarker(base: Base): L.Marker {
-    const playerIcon = L.icon({
-      iconUrl: 'assets/img/simple-base.png',
+    const baseImage = this.getBaseImage(base.type);
+
+    const baseIcon = L.icon({
+      iconUrl: `assets/img/${baseImage}`,
       iconSize:     [24, 24], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
       iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
@@ -177,24 +180,59 @@ export class MapComponent implements AfterViewInit, OnChanges {
       popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
     });
 
-    let marker = this.createMarker(base.position, playerIcon);
+    let marker = this.createMarker(base.position, baseIcon);
     let onClick = () => this.onBaseSelected.emit(base.trackId);
     return marker.on('click', onClick);
   }
 
+  getBaseImage(type?: BaseType) {
+    if (type) {
+      switch (type) {
+        case BaseType.Small:
+          return 'simple-base.png'
+        case BaseType.Large:
+          return 'large-base.png'
+        case BaseType.Raided:
+          return 'raided-base.png'
+      }
+    } else {
+      return 'simple-base.png';
+    }
+  }
+
   createVehicleMarker(vehicle: Vehicle): L.Marker {
-    const playerIcon = L.icon({
-      iconUrl: 'assets/img/vehicle.png',
-      iconSize:     [24, 24], // size of the icon
+    const data = this.getVehicleIconData(vehicle.type);
+
+    const vehicleIcon = L.icon({
+      // TODO: Handle different vehicles
+      iconUrl: `assets/img/${data.sprite}`,
+      iconSize:     [data.iconSize, data.iconSize], // size of the icon
       shadowSize:   [0, 0], // size of the shadow
-      iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
+      iconAnchor:   [data.iconSize / 2, data.iconSize / 2], // point of the icon which will correspond to marker's location
       shadowAnchor: [0, 0],  // the same for the shadow
       popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
     });
 
-    let marker = this.createMarker(vehicle.position, playerIcon);
+    let marker = this.createMarker(vehicle.position, vehicleIcon);
     let onClick = () => this.onVehicleSelected.emit(vehicle.instanceId);
     return marker.on('click', onClick);
+  }
+
+  getVehicleIconData(type: VehicleType): MapEntityData {
+    switch (type) {
+      case VehicleType.Car:
+        return {iconSize: 24, sprite: 'car.png'};
+      case VehicleType.Boat:
+        return {iconSize: 24, sprite: 'boat.png'};
+      case VehicleType.Helicopter:
+        return {iconSize: 24, sprite: 'helicopter.png'};
+      case VehicleType.Blimp:
+        return {iconSize: 24, sprite: 'blimp.png'};
+      case VehicleType.Plane:
+        return {iconSize: 24, sprite: 'plane.png'};
+      case VehicleType.Train:
+        return {iconSize: 24, sprite: 'train.png'};
+    }
   }
 
   createMarker(position: Position, icon: L.Icon): L.Marker {
@@ -215,4 +253,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     return [x, y]
   }
+}
+
+interface MapEntityData {
+  iconSize: number;
+  sprite: string;
 }
