@@ -215,6 +215,11 @@ namespace Monocle.Services
                         BuildMessageAndSend(socket, ServerMessageType.UserNotFound, new UserNotFoundError(userId!));
                     }
                     return;
+                case RequestType.GameMap:
+                    var gameMap = UnturnedService.GetGameMap();
+                    var gameMapEncoded = Convert.ToBase64String(gameMap);
+                    BuildMessageAndSend(socket, ServerMessageType.GameMap, gameMapEncoded);
+                    return;
                 case RequestType.Unknown:
                     BuildMessageAndSend(socket, ServerMessageType.InvalidRequestType, "The request type was not provided or invalid");
                     return;

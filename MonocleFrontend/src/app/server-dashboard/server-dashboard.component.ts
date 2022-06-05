@@ -30,6 +30,7 @@ export class ServerDashboardComponent implements OnInit {
   selectedEntityType = SelectedEntityType; // used in ngSwitch
 
   noGroupId: string = '0';
+  gameMapUrl?: string;
 
   connectAndLogin(request: AuthenticationRequest) {
     this.websocketService.connect(request.host, request.port, request.ssl);
@@ -72,6 +73,10 @@ export class ServerDashboardComponent implements OnInit {
 
     this.websocketService.onGetServerInfo.subscribe(serverDetails => {
       this.serverInfo = serverDetails;
+    })
+
+    this.websocketService.onGetGameMap.subscribe(gameMap => {
+      this.gameMapUrl = `data:image/png;base64,${gameMap}`;
     })
 
     this.websocketService.onPlayerMessage.subscribe(playerMessage => {
@@ -141,6 +146,8 @@ export class ServerDashboardComponent implements OnInit {
     this.getStructures();
     const structuresFetchInterval = interval(60_000);
     structuresFetchInterval.subscribe(() => this.getStructures())
+
+    this.getGameMap();
 
     setTimeout(() => {
       this.findBases()
@@ -344,6 +351,7 @@ export class ServerDashboardComponent implements OnInit {
   getPlayers() { this.websocketService.getPlayers(); }
   getPlayerScreenshot(id: PlayerId) { this.websocketService.getPlayerScreenshot(id); }
   getVehicles() { this.websocketService.getVehicles(); }
+  getGameMap() { this.websocketService.getGameMap(); }
   getStructures() { this.websocketService.getStructures(); }
   getBarricades() { this.websocketService.getBarricades(); }
   getServerDetails() { this.websocketService.getServerDetails(); }

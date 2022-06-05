@@ -4,7 +4,6 @@ import { interval, tap } from 'rxjs';
 import { VehicleType } from '../types/enums';
 import { Base, BaseType, Item, Player, PlayerId, Position, ServerInfo, Vehicle } from '../types/models';
 
-
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -15,6 +14,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Input() vehicles?: Vehicle[];
   @Input() bases?: Base[];
   @Input() serverInfo?: ServerInfo;
+  @Input() mapImageUrl?: string;
   @Output() onPlayerSelected = new EventEmitter<PlayerId>();
   @Output() onVehicleSelected = new EventEmitter<string>();
   @Output() onBaseSelected = new EventEmitter<string>();
@@ -32,10 +32,10 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     const subscription = interval(1000)
       .pipe(tap(() => {
-        if (this.serverInfo) {
+        if (this.serverInfo && this.mapImageUrl) {
           this.addMap(this.serverInfo);
           let info = this.serverInfo;
-          this.meter = ((info.worldSize - info.borderSize) / info.worldSize) / 0.908;
+          this.meter = ((info.worldSize - info.borderSize) / info.worldSize) / 0.908; // TODO: This only works precisely for 2048x2048 maps
           subscription.unsubscribe();
         }
       }))
@@ -132,7 +132,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   addMap(serverInfo: ServerInfo) {
     const half = serverInfo.worldSize / 2;
     const bounds = L.latLngBounds([-half, -half], [half, half]); // 2048x2048 -> ([-1024, -1024], [1024, 1024])
-    const image = L.imageOverlay('https://i.imgur.com/gqoRnQd.jpg', bounds);
+    const image = L.imageOverlay(this.mapImageUrl!, bounds);
     image.addTo(this.map);
     this.map.fitBounds(bounds);
   }

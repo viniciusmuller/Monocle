@@ -10,6 +10,7 @@ export enum RequestType
     Vehicles,
     ServerInfo,
     PlayerScreenshot,
+    GameMap,
 }
 
 // TODO: This is doing more than the necessary (should have only username and password)

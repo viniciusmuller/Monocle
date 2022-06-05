@@ -26,6 +26,7 @@ export class WebsocketService {
   public onGetVehicles: Subject<Vehicle[]> = new Subject();
   public onGetServerInfo: Subject<ServerInfo> = new Subject();
   public onGetPlayerScreenshot: Subject<PlayerScreenshotResponse> = new Subject();
+  public onGetGameMap: Subject<string> = new Subject();
 
   // Events
   public onPlayerMessage: Subject<PlayerMessage> = new Subject();
@@ -72,6 +73,9 @@ export class WebsocketService {
       case ServerMessageType.PlayerScreenshot:
         return this.onGetPlayerScreenshot.next(message.data as PlayerScreenshotResponse);
 
+      case ServerMessageType.GameMap:
+        return this.onGetGameMap.next(message.data as string);
+
       // Events
       case ServerMessageType.OnPlayerMessage:
         return this.onPlayerMessage.next(message.data as PlayerMessage);
@@ -104,6 +108,10 @@ export class WebsocketService {
 
   public getBarricades() {
     this.sendRequestType(RequestType.Barricades, null); 
+  }
+
+  public getGameMap() {
+    this.sendRequestType(RequestType.GameMap, null); 
   }
 
   public getStructures() {

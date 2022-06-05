@@ -4,6 +4,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,27 +24,33 @@ namespace Monocle.Services
 
         public void ScreenshotPlayer(string playerId, Guid socketId, Action<string, Guid, byte[]> callback)
         {
-            // TODO: Improve code
             var client = Provider.clients.Find(p => p.playerID.steamID.ToString() == playerId);
-            client.player.sendScreenshot(CSteamID.Nil, (player, jpg) => {
+            client?.player.sendScreenshot(CSteamID.Nil, (player, jpg) => {
                 callback(playerId, socketId, jpg);
             });
         }
 
+        public byte[] GetGameMap()
+        {
+            var mapName = GetMapName();
+            var gameRootPath = Directory.GetParent(Rocket.Core.Environment.PermissionFile).Parent.Parent.Parent;
+            var imagePath = Path.Combine(gameRootPath.FullName, "Maps", mapName, "Map.png");
+            return File.ReadAllBytes(imagePath);
+        }
+
+        private string GetMapName() => Provider.map;
+
         public ServerInfoModel GetServerInfo()
         {
-            var mapImage = new byte[10]; // TODO: Read image
-            
             return new ServerInfoModel
             {
-                MapName = Provider.map,
+                MapName = GetMapName(),
                 MaxPlayers = Provider.maxPlayers,
                 ServerName = Provider.serverName,
                 QueueSize = Provider.queueSize,
                 CurrentPlayers = Provider.clients.Count,
                 UnturnedVersion = Provider.APP_VERSION,
                 MonocleVersion = MonocleVersion,
-                MapImageEncoded = Convert.ToBase64String(mapImage),
                 PlayersInQueue = Provider.queuePosition,
                 WorldSize = Level.size,
                 BorderSize = Level.border,

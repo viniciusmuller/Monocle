@@ -18,6 +18,7 @@ namespace Monocle.Api
         Vehicles,
         ServerInfo,
         PlayerScreenshot,
+        GameMap,
     }
 
     internal class LoginRequest

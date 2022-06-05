@@ -18,6 +18,7 @@ namespace Monocle.Api
         Structures,
         ServerInfo,
         PlayerScreenshot,
+        GameMap,
 
         // Events
         OnPlayerDeath,

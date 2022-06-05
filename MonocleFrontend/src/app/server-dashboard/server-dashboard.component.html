@@ -7,7 +7,12 @@
                     (onPlayerSelected)="playerSelected($event)" 
                     (onVehicleSelected)="vehicleSelected($event)" 
                     (onBaseSelected)="baseSelected($event)" 
-                    [serverInfo]="serverInfo" [bases]="bases" [vehicles]="vehicles" [players]="players">
+                    [serverInfo]="serverInfo" 
+                    [bases]="bases" 
+                    [vehicles]="vehicles" 
+                    [players]="players"
+                    [mapImageUrl]="gameMapUrl"
+                    >
                 </app-map>
             </div>
             <div class="col-md">
