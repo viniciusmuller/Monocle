@@ -1,6 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ItemRarity, ItemType } from '../types/enums';
-import { Item } from '../types/models';
+import { Item, WeaponAttachmentsModel } from '../types/models';
 
 @Component({
   selector: 'app-item',
@@ -10,6 +10,10 @@ import { Item } from '../types/models';
 export class ItemComponent implements OnInit {
   @Input() item!: Item;
   @Input() description?: string;
+  @Input() userCanModerate?: boolean;
+  @Output() onDestroy = new EventEmitter<Item>();
+
+  weaponAttachments?: Item[];
 
   getCssClassFromItemRarity(type: ItemRarity): string {
     switch (type) {
@@ -22,6 +26,29 @@ export class ItemComponent implements OnInit {
     }
   }
 
+  destroyItem(item: Item) {
+    this.onDestroy.emit(item);
+  }
+
+  listAttachments(weaponAttachments: WeaponAttachmentsModel): (Item | undefined)[] {
+    return [
+      weaponAttachments?.sight,
+      weaponAttachments?.tactical,
+      weaponAttachments?.grip,
+      weaponAttachments?.barrel,
+      weaponAttachments?.ammo,
+    ];
+  }
+
   constructor() { }
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    if (this.item.weaponAttachments) {
+      this.weaponAttachments = [];
+      for (const item of this.listAttachments(this.item.weaponAttachments)) {
+        if (item != undefined) {
+          this.weaponAttachments.push(item);
+        }
+      }
+    }
+  }
 }

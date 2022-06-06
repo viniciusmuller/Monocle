@@ -12,9 +12,33 @@
     <p>Amount: {{item.amount}}</p>
     <p>Durability: {{item.durability}}%</p>
     <p>Id: {{item.id}}</p>
+    <p *ngIf="item.weaponAttachments">Ammo: {{item.weaponAttachments.currentAmmo}}</p>
 
-    <!-- TODO: Implement add deletion -->
-    <button mat-raised-button color="warn">Remove</button>
+    <mat-expansion-panel *ngIf="weaponAttachments && weaponAttachments.length > 0">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Attachments
+            </mat-panel-title>
+
+            <mat-panel-title>
+                {{weaponAttachments.length}} items
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <app-player-inventory 
+            [items]="weaponAttachments"
+            [userCanModerate]="userCanModerate"
+            [canAddItems]="false"
+            (onItemDestroy)="destroyItem($event)"
+        ></app-player-inventory>
+    </mat-expansion-panel>
+
+    <button 
+        *ngIf="userCanModerate"
+        mat-raised-button 
+        color="warn" 
+        (click)="destroyItem(item)"
+    >Remove</button>
 </mat-expansion-panel>
 
 <ng-template #amountDescription>

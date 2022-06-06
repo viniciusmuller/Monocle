@@ -93,4 +93,20 @@ namespace Monocle.Api
         Legendary,
         Mythical
     }
+
+    enum FireMode
+    {
+        Unknown,
+        Safety,
+        SemiAuto,
+        FullAuto,
+        Burst,
+    }
+
+    enum SwitchState
+    {
+        Unknown,
+        On,
+        Off,
+    }
 }

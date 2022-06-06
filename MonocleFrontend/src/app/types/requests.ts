@@ -12,7 +12,8 @@ export enum RequestType {
   GameMap,
   KickPlayer,
   BanPlayer,
-  DestroyVehicle
+  DestroyVehicle,
+  DestroyItem,
 }
 
 // TODO: This is doing more than the necessary (should have only username and password)

@@ -20,7 +20,12 @@
                 </mat-panel-title>
             </mat-expansion-panel-header>
 
-            <app-player-inventory [items]="player.items"></app-player-inventory>
+            <app-player-inventory 
+                [items]="player.items"
+                [userCanModerate]="userCanModerate"
+                [canAddItems]="true"
+                (onItemDestroy)="emitItemDestroyRequested($event)"
+            ></app-player-inventory>
         </mat-expansion-panel>
 
         <mat-expansion-panel>

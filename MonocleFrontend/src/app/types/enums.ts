@@ -78,5 +78,19 @@ export enum ItemRarity
     Rare,
     Epic,
     Legendary,
-    Mythical
+    Mythical,
+}
+
+export enum SwitchState {
+    Unknown,
+    On,
+    Off,
+}
+
+export enum FireMode {
+    Unknown,
+    Safety,
+    SemiAuto,
+    FullAuto,
+    Burst,
 }

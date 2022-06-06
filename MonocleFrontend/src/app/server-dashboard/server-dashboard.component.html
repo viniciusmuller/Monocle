@@ -25,15 +25,26 @@
                                 [player]="getSelectedPlayer()"
                                 (banRequested)="banPlayer($event)"
                                 (kickRequested)="kickPlayer($event)"
+                                (itemDestroyRequested)="destroyItem($event)"
                                 >
                             </app-player>
                         </div>
                         <div *ngSwitchCase="selectedEntityType.Vehicle">
-                            <app-vehicle [userCanModerate]="userCanModerate()" [vehicle]="getSelectedVehicle()" (onEmitDestroy)="destroyVehicle($event)"></app-vehicle>
+                            <app-vehicle 
+                                [userCanModerate]="userCanModerate()"
+                                [vehicle]="getSelectedVehicle()"
+                                (onEmitDestroy)="destroyVehicle($event)"
+                            ></app-vehicle>
                         </div>
                         <div *ngSwitchCase="selectedEntityType.Base">
                             <!-- TODO: Don't call getSelectedBase more than once -->
-                            <app-base [base]="getSelectedBase()" [barricades]="getSelectedBase()?.barricades" [structures]="getSelectedBase()?.structures"></app-base>
+                            <app-base 
+                                [base]="getSelectedBase()"
+                                [userCanModerate]="userCanModerate()" 
+                                [barricades]="getSelectedBase()?.barricades"
+                                [structures]="getSelectedBase()?.structures"
+                                (destroyItemRequested)="destroyItem($event)"
+                            ></app-base>
                         </div>
                     </div>
                 </ng-container>

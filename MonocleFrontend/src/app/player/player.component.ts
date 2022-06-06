@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Player, PlayerId } from '../types/models';
+import { Item, Player, PlayerId } from '../types/models';
 
 @Component({
   selector: 'app-player',
@@ -12,6 +12,7 @@ export class PlayerComponent implements OnInit {
   @Output() onWatchRequest = new EventEmitter<PlayerId>();
   @Output() banRequested = new EventEmitter<Player>();
   @Output() kickRequested = new EventEmitter<Player>();
+  @Output() itemDestroyRequested = new EventEmitter<Item>();
 
   constructor() { }
   ngOnInit(): void { }
@@ -30,6 +31,10 @@ export class PlayerComponent implements OnInit {
 
   emitKickRequested() {
     this.kickRequested.emit(this.player!);
+  }
+
+  emitItemDestroyRequested(item: Item) {
+    this.itemDestroyRequested.emit(item);
   }
 
   emitWatchPlayer() {

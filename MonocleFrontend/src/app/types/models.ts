@@ -1,4 +1,4 @@
-import { ChatMode, ItemRarity, VehicleType } from "./enums";
+import { ChatMode, FireMode, ItemRarity, SwitchState, VehicleType } from "./enums";
 
 // TODO: Try to use ids as numbers
 export type PlayerId = string;
@@ -16,6 +16,19 @@ export interface Item {
     id: number;
     durability: number;
     rarity: ItemRarity;
+    instanceId: string;
+    weaponAttachments?: WeaponAttachmentsModel;
+}
+
+export interface WeaponAttachmentsModel {
+    sight?: Item;
+    tactical?: Item;
+    grip?: Item;
+    barrel?: Item;
+    ammo?: Item;
+    tacticalStatus: SwitchState;
+    fireMode: FireMode;
+    currentAmmo: number;
 }
 
 export interface Equipment {

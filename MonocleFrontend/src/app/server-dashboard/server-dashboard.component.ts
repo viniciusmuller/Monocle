@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { interval, lastValueFrom, Observable, of, timer } from 'rxjs';
-import { Barricade, Base, BaseType, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
+import { Barricade, Base, BaseType, Item, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
 import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
 import { AuthorizedUserType } from '../types/enums';
@@ -156,6 +156,12 @@ export class ServerDashboardComponent implements OnInit {
     }
   }
 
+  async destroyItem(item: Item) {
+    let confirmation = this.dialogConfirm('Destroy Item', `Are you sure you want to destroy ${item.name}?`, true);
+    if (await confirmation) {
+      this.websocketService.destroyItem(item);
+    }
+  }
 
   async dialogConfirm(title: string, message: string, isDangerous: boolean): Promise<boolean> {
       let dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {

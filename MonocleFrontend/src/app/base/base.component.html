@@ -26,7 +26,11 @@
 
         <ng-container *ngIf="barricades && barricades.length > 0">
             <ng-container *ngFor="let barricade of barricades; trackBy: trackBarricade">
-                <app-barricade [barricade]="barricade"></app-barricade>
+                <app-barricade 
+                    [barricade]="barricade"
+                    [userCanModerate]="userCanModerate"
+                    (destroyItem)="emitDestroyItem($event)"
+                ></app-barricade>
             </ng-container>
         </ng-container>
     </mat-expansion-panel>

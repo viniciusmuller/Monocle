@@ -134,10 +134,9 @@ export class WebsocketService {
     this.sendRequestType(RequestType.DestroyVehicle, vehicle.instanceId); 
   }
 
-  // TODO: Destroy items
-  // public destroyItem(item: Item) {
-  //   this.sendRequestType(RequestType.DestroyVehicle, item.instanceId); 
-  // }
+  public destroyItem(item: Item) {
+    this.sendRequestType(RequestType.DestroyItem, item.instanceId); 
+  }
   
   public getPlayerScreenshot(id: PlayerId) {
     let request = { userId: id };

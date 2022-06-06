@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Barricade, Base, Structure } from '../types/models';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Barricade, Base, Item, Structure } from '../types/models';
 
 @Component({
   selector: 'app-base',
@@ -8,8 +8,10 @@ import { Barricade, Base, Structure } from '../types/models';
 })
 export class BaseComponent implements OnInit {
   @Input() base?: Base;
+  @Input() userCanModerate?: boolean;
   @Input() structures?: Structure[];
   @Input() barricades?: Barricade[];
+  @Output() destroyItemRequested = new EventEmitter<Item>();
 
   trackBarricade(_index: number, barricade: Barricade) {
     return barricade.instanceId;
@@ -17,6 +19,10 @@ export class BaseComponent implements OnInit {
 
   trackStructure(_index: number, structure: Structure) {
     return structure.instanceId;
+  }
+
+  emitDestroyItem(item: Item) {
+    this.destroyItemRequested.emit(item);
   }
 
   round(number: number): number {
