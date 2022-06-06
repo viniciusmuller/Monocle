@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { interval, Observable, of, timer } from 'rxjs';
+import { interval, lastValueFrom, Observable, of, timer } from 'rxjs';
 import { Barricade, Base, BaseType, MonocleEvent, Player, PlayerId, PlayerMessage, SelectedEntity, SelectedEntityType, ServerInfo, Structure, Vehicle } from '../types/models';
 import { AuthenticationRequest } from '../types/requests';
 import { WebsocketService } from '../services/websocket.service';
@@ -8,6 +8,8 @@ import { SuccesfulAuthenticationResponse } from '../types/responses';
 import { ScreenshotDialogComponent } from '../screenshot-dialog/screenshot-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import * as uuid from 'uuid';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { MatSnackBar, _SnackBarContainer } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-server-dashboard',
@@ -40,7 +42,9 @@ export class ServerDashboardComponent implements OnInit {
   }
 
   constructor(private websocketService: WebsocketService, 
-              private screenshotDialog: MatDialog) {
+              private screenshotDialog: MatDialog,
+              private confirmDialog: MatDialog,
+              private snackBar: MatSnackBar) {
     this.chatLog = [];
     this.eventLog = [];
     this.bases = [];
@@ -84,6 +88,10 @@ export class ServerDashboardComponent implements OnInit {
     })
 
     this.websocketService.internalServerError.subscribe(error => {
+      this.snackBar.open(`Server error: ${error.message}`, 'Close', {
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+      });
       console.error(error.message, error.code, error.stackTrace);
     })
 
@@ -94,8 +102,6 @@ export class ServerDashboardComponent implements OnInit {
     this.websocketService.onGetPlayerScreenshot.subscribe(screenshotResponse => {
       const imagePath = 'data:image/jpg;base64,' + screenshotResponse.screenEncoded;
       let dialogRef = this.screenshotDialog.open(ScreenshotDialogComponent, {
-        width: '700px',
-        height: '580px',
         data: { imagePath }
       });
     })
@@ -127,6 +133,40 @@ export class ServerDashboardComponent implements OnInit {
 
   watchPlayer(id: PlayerId) {
     this.getPlayerScreenshot(id);
+  }
+
+  async banPlayer(player: Player) {
+    let confirmation = this.dialogConfirm('Ban Player', `Are you sure you want to ban ${player.name}?`, true);
+    if (await confirmation) {
+      this.websocketService.banPlayer(player);
+    }
+  }
+
+  async kickPlayer(player: Player) {
+    let confirmation = this.dialogConfirm('Kick Player', `Are you sure you want to kick ${player.name}?`, true);
+    if (await confirmation) {
+      this.websocketService.kickPlayer(player);
+    }
+  }
+
+  async destroyVehicle(vehicle: Vehicle) {
+    let confirmation = this.dialogConfirm('Destroy Vehicle', `Are you sure you want to destroy ${vehicle.name}?`, true);
+    if (await confirmation) {
+      this.websocketService.destroyVehicle(vehicle);
+    }
+  }
+
+
+  async dialogConfirm(title: string, message: string, isDangerous: boolean): Promise<boolean> {
+      let dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
+        data: { 
+          title,
+          message,
+          isDangerous
+        }
+      });
+
+      return await lastValueFrom<boolean>(dialogRef.afterClosed());
   }
 
   bindRequests() {

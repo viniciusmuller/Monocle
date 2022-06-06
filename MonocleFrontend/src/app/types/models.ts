@@ -9,6 +9,7 @@ export interface Position {
     z: number;
 }
 
+// TODO: add instanceId
 export interface Item {
     name: string;
     amount: number;

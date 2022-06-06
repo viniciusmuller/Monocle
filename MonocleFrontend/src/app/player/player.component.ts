@@ -10,6 +10,8 @@ export class PlayerComponent implements OnInit {
   @Input() player?: Player;
   @Input() userCanModerate?: boolean;
   @Output() onWatchRequest = new EventEmitter<PlayerId>();
+  @Output() banRequested = new EventEmitter<Player>();
+  @Output() kickRequested = new EventEmitter<Player>();
 
   constructor() { }
   ngOnInit(): void { }
@@ -22,9 +24,15 @@ export class PlayerComponent implements OnInit {
     return Object.values(player.equipment).reduce((acc, item) => acc + (item ? 1 : 0), 0)
   }
 
+  emitBanRequested() {
+    this.banRequested.emit(this.player!);
+  }
+
+  emitKickRequested() {
+    this.kickRequested.emit(this.player!);
+  }
+
   emitWatchPlayer() {
-    if (this.player) {
-      this.onWatchRequest.emit(this.player.id);
-    }
+    this.onWatchRequest.emit(this.player!.id);
   }
 }

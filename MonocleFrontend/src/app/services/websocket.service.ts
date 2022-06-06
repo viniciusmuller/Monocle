@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ServerMessage, ServerMessageType } from 'src/app/types/server';
-import { Barricade, Player, PlayerDeath, PlayerId, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
+import { Barricade, Item, Player, PlayerDeath, PlayerId, PlayerJoinOrLeave, PlayerMessage, ServerInfo, Structure, Vehicle } from 'src/app/types/models';
 import { PlayerScreenshotResponse, SuccesfulAuthenticationResponse } from '../types/responses';
 import { RequestType } from '../types/requests';
 import { InternalServerError, UserNotFoundError } from '../types/errors';
@@ -121,6 +121,23 @@ export class WebsocketService {
   public getServerDetails() {
     this.sendRequestType(RequestType.ServerInfo, null); 
   }
+
+  public kickPlayer(player: Player) {
+    this.sendRequestType(RequestType.KickPlayer, player.id); 
+  }
+
+  public banPlayer(player: Player) {
+    this.sendRequestType(RequestType.BanPlayer, player.id); 
+  }
+
+  public destroyVehicle(vehicle: Vehicle) {
+    this.sendRequestType(RequestType.DestroyVehicle, vehicle.instanceId); 
+  }
+
+  // TODO: Destroy items
+  // public destroyItem(item: Item) {
+  //   this.sendRequestType(RequestType.DestroyVehicle, item.instanceId); 
+  // }
   
   public getPlayerScreenshot(id: PlayerId) {
     let request = { userId: id };

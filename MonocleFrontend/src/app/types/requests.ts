@@ -1,16 +1,18 @@
 import { PlayerId } from "./models";
 
-export enum RequestType
-{
-    Unknown,
-    Authenticate,
-    Players,
-    Structures,
-    Barricades,
-    Vehicles,
-    ServerInfo,
-    PlayerScreenshot,
-    GameMap,
+export enum RequestType {
+  Unknown,
+  Authenticate,
+  Players,
+  Structures,
+  Barricades,
+  Vehicles,
+  ServerInfo,
+  PlayerScreenshot,
+  GameMap,
+  KickPlayer,
+  BanPlayer,
+  DestroyVehicle
 }
 
 // TODO: This is doing more than the necessary (should have only username and password)

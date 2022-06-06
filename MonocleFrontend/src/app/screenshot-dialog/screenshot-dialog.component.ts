@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 interface ScreenshotDialogData {
@@ -10,7 +10,7 @@ interface ScreenshotDialogData {
   templateUrl: './screenshot-dialog.component.html',
   styleUrls: ['./screenshot-dialog.component.scss']
 })
-export class ScreenshotDialogComponent implements OnInit {
+export class ScreenshotDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<ScreenshotDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ScreenshotDialogData
@@ -19,6 +19,4 @@ export class ScreenshotDialogComponent implements OnInit {
   close() {
     this.dialogRef.close();
   }
-
-  ngOnInit(): void { }
 }

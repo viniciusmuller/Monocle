@@ -25,11 +25,13 @@ import {MatListModule} from '@angular/material/list';
 import {MatCardModule} from '@angular/material/card'; 
 import {MatDialogModule} from '@angular/material/dialog'; 
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { VehicleComponent } from './vehicle/vehicle.component';
 import { BaseComponent } from './base/base.component';
 import { BarricadeComponent } from './barricade/barricade.component';
 import { StructureComponent } from './structure/structure.component';
 import { ScreenshotDialogComponent } from './screenshot-dialog/screenshot-dialog.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +52,7 @@ import { ScreenshotDialogComponent } from './screenshot-dialog/screenshot-dialog
     BarricadeComponent,
     StructureComponent,
     ScreenshotDialogComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -64,7 +67,8 @@ import { ScreenshotDialogComponent } from './screenshot-dialog/screenshot-dialog
     MatListModule,
     MatCardModule,
     MatCheckboxModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSnackBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -22,11 +22,14 @@
                             <app-player
                                 (onWatchRequest)="watchPlayer($event)" 
                                 [userCanModerate]="userCanModerate()" 
-                                [player]="getSelectedPlayer()">
+                                [player]="getSelectedPlayer()"
+                                (banRequested)="banPlayer($event)"
+                                (kickRequested)="kickPlayer($event)"
+                                >
                             </app-player>
                         </div>
                         <div *ngSwitchCase="selectedEntityType.Vehicle">
-                            <app-vehicle [userCanModerate]="userCanModerate()" [vehicle]="getSelectedVehicle()"></app-vehicle>
+                            <app-vehicle [userCanModerate]="userCanModerate()" [vehicle]="getSelectedVehicle()" (onEmitDestroy)="destroyVehicle($event)"></app-vehicle>
                         </div>
                         <div *ngSwitchCase="selectedEntityType.Base">
                             <!-- TODO: Don't call getSelectedBase more than once -->
