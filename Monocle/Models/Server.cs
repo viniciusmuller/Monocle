@@ -18,5 +18,12 @@ namespace Monocle.Models
         public int BorderSize { get; set; }
         public int QueueSize { get; set; }
         public int PlayersInQueue { get; set; }
+        public TimeModel GameTime { get; set; }
+    }
+
+    public class TimeModel
+    {
+        public uint Minutes;
+        public uint Hours;
     }
 }

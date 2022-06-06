@@ -8,6 +8,7 @@
         </div>
         <p>Connected to Monocle v{{serverInfo.monocleVersion}}, server running Unturned v{{serverInfo.unturnedVersion}}</p>
         <p>Map {{serverInfo.mapName}}, {{serverInfo.worldSize}}x{{serverInfo.worldSize}}</p>
+        <p>Game time: {{padTimeUnit(serverInfo.gameTime.hours)}}:{{padTimeUnit(serverInfo.gameTime.minutes)}}</p>
     </ng-container>
 </mat-card>
 

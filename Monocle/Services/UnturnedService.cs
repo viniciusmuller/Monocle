@@ -54,6 +54,20 @@ namespace Monocle.Services
                 PlayersInQueue = Provider.queuePosition,
                 WorldSize = Level.size,
                 BorderSize = Level.border,
+                GameTime = GetServerTime(),
+            };
+        }
+
+        public TimeModel GetServerTime()
+        {
+            // TODO: Implement this properly
+            //var hour = LightingManager.cycle / 24;
+            //var minute = LightingManager.cycle / 1440;
+
+            return new TimeModel
+            {
+                Hours = 17,
+                Minutes = 00,
             };
         }
 

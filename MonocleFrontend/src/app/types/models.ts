@@ -117,7 +117,12 @@ export interface ServerInfo {
     playersInQueue: number;
     worldSize: number;
     borderSize: number;
-    mapImageEncoded: string;
+    gameTime: GameTime;
+}
+
+export interface GameTime {
+    hours: number;
+    minutes: number;
 }
 
 export interface PlayerMessage {

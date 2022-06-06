@@ -10,6 +10,10 @@ export class ServerDetailsComponent implements OnInit {
   @Input() totalPlayers: number = 0;
   @Input() serverInfo?: ServerInfo;
   
+  padTimeUnit(unit: number): string {
+    return unit.toString().padStart(2, '0');
+  }
+
   constructor() { }
   ngOnInit(): void { }
 }
